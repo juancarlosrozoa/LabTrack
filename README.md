@@ -143,16 +143,16 @@ laboratories
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Mobile | Flutter (iOS & Android) |
-| Barcode scanning | mobile_scanner |
-| Barcode generation | barcode_widget |
-| Local storage | Drift (SQLite) |
-| Backend | Supabase (PostgreSQL + Auth + Realtime) |
-| Push notifications | Firebase Cloud Messaging |
-| Spreadsheet sync | Google Sheets API |
-| API | Supabase Edge Functions |
+| Layer              | Technology                              |
+|--------------------|-----------------------------------------|
+| Mobile             | Flutter (iOS & Android)                 |
+| Barcode scanning   | mobile_scanner                          |
+| Barcode generation | barcode_widget                          |
+| Local storage      | Drift (SQLite)                          |
+| Backend            | Supabase (PostgreSQL + Auth + Realtime) |
+| Push notifications | Firebase Cloud Messaging                |
+| Spreadsheet sync   | Google Sheets API                       |
+| API                | Supabase Edge Functions                 |
 
 ---
 
@@ -189,11 +189,11 @@ LabTrack
 The system exposes endpoints for integration with external applications:
 
 ```
-GET  /api/inventario/{lab_id}           current stock
-GET  /api/productos/{barcode}           find product by barcode
-POST /api/movimientos                   register entry or exit
-GET  /api/alertas/{lab_id}             active alerts
-GET  /api/lotes/por-vencer/{lab_id}    lots expiring soon
+GET  /api/inventory/{lab_id}            current stock
+GET  /api/products/{barcode}            find product by barcode
+POST /api/movements                     register entry or exit
+GET  /api/alerts/{lab_id}               active alerts
+GET  /api/lots/expiring-soon/{lab_id}   lots expiring soon
 ```
 
 Each request requires an API key scoped to the laboratory.
@@ -204,13 +204,13 @@ Each request requires an API key scoped to the laboratory.
 
 LabTrack can notify external systems when inventory events occur:
 
-| Event | Payload |
-|---|---|
-| `stock_critico` | product, current quantity, reorder point |
-| `vencimiento_proximo` | lot, product, expiration date, days remaining |
-| `lote_vencido` | lot, product |
-| `entrada_registrada` | product, quantity, lot, user |
-| `ajuste_aprobado` | product, expected, counted, difference, user |
+| Event                 | Payload                                       |
+|-----------------------|-----------------------------------------------|
+| `critical_stock`      | product, current quantity, reorder point      |
+| `expiring_soon`       | lot, product, expiration date, days remaining |
+| `lot_expired`         | lot, product                                  |
+| `entry_registered`    | product, quantity, lot, user                  |
+| `adjustment_approved` | product, expected, counted, difference, user  |
 
 ---
 
