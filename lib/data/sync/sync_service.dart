@@ -1,0 +1,224 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:drift/drift.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../local/database.dart';
+import '../local/database_provider.dart';
+import '../local/tables.dart';
+import '../remote/supabase_client.dart';
+import '../../features/auth/providers/lab_provider.dart';
+
+// ── Provider ──────────────────────────────────────────────
+
+final syncServiceProvider = Provider<SyncService>((ref) {
+  final db  = ref.watch(databaseProvider);
+  final lab = ref.watch(selectedLabProvider);
+  return SyncService(db: db, labId: lab?.labId);
+});
+
+// ── Service ───────────────────────────────────────────────
+
+class SyncService {
+  SyncService({required this.db, required this.labId});
+
+  final AppDatabase db;
+  final String?     labId;
+
+  /// Full sync: pull remote → local, then push unsynced local → remote.
+  Future<void> syncAll() async {
+    if (labId == null) return;
+    if (!await _isOnline()) return;
+
+    await Future.wait([
+      _pullCatalog(),   // categories, locations, suppliers
+      _pullProducts(),
+      _pullLots(),
+      _pullMovements(),
+    ]);
+
+    await _pushUnsyncedMovements();
+  }
+
+  /// Push only — used right after registering a local movement.
+  Future<void> pushPending() async {
+    if (!await _isOnline()) return;
+    await _pushUnsyncedMovements();
+  }
+
+  // ── Pull ────────────────────────────────────────────────
+
+  Future<void> _pullCatalog() async {
+    final results = await Future.wait([
+      supabase.from('categories').select().eq('lab_id', labId!),
+      supabase.from('locations').select().eq('lab_id', labId!),
+      supabase.from('suppliers').select().eq('lab_id', labId!),
+    ]);
+
+    final cats  = results[0] as List;
+    final locs  = results[1] as List;
+    final sups  = results[2] as List;
+
+    await db.inventoryDao.upsertAllCategories(
+      cats.map(_rowToCategory).toList(),
+    );
+    await db.inventoryDao.upsertAllLocations(
+      locs.map(_rowToLocation).toList(),
+    );
+    await db.inventoryDao.upsertAllSuppliers(
+      sups.map(_rowToSupplier).toList(),
+    );
+  }
+
+  Future<void> _pullProducts() async {
+    final rows = await supabase
+        .from('products')
+        .select()
+        .eq('lab_id', labId!)
+        .eq('is_active', true) as List;
+
+    await db.inventoryDao.upsertAllProducts(
+      rows.map(_rowToProduct).toList(),
+    );
+  }
+
+  Future<void> _pullLots() async {
+    // Pull lots for all products in this lab via join
+    final rows = await supabase
+        .from('lots')
+        .select('*, products!inner(lab_id)')
+        .eq('products.lab_id', labId!) as List;
+
+    await db.inventoryDao.upsertAllLots(
+      rows.map(_rowToLot).toList(),
+    );
+  }
+
+  Future<void> _pullMovements() async {
+    final rows = await supabase
+        .from('movements')
+        .select()
+        .eq('lab_id', labId!)
+        .order('created_at', ascending: false)
+        .limit(200) as List;
+
+    await db.movementsDao.upsertAllMovements(
+      rows.map(_rowToMovement).toList(),
+    );
+  }
+
+  // ── Push ────────────────────────────────────────────────
+
+  Future<void> _pushUnsyncedMovements() async {
+    final pending = await db.movementsDao.getUnsynced();
+    if (pending.isEmpty) return;
+
+    for (final m in pending) {
+      try {
+        await supabase.from('movements').upsert({
+          'id':         m.id,
+          'lab_id':     m.labId,
+          'product_id': m.productId,
+          'lot_id':     m.lotId,
+          'type':       m.type,
+          'quantity':   m.quantity,
+          'reason':     m.reason,
+          'area':       m.area,
+          'project':    m.project,
+          'user_id':    m.userId,
+          'created_at': m.createdAt.toIso8601String(),
+        });
+        await db.movementsDao.markSynced(m.id);
+      } catch (_) {
+        // Leave as unsynced — will retry on next sync
+      }
+    }
+  }
+
+  // ── Connectivity ────────────────────────────────────────
+
+  Future<bool> _isOnline() async {
+    final result = await Connectivity().checkConnectivity();
+    return result != ConnectivityResult.none;
+  }
+
+  // ── Row mappers ─────────────────────────────────────────
+
+  CategoriesCompanion _rowToCategory(dynamic row) => CategoriesCompanion(
+        id:        Value(row['id'] as String),
+        labId:     Value(row['lab_id'] as String),
+        name:      Value(row['name'] as String),
+        createdAt: Value(DateTime.parse(row['created_at'] as String)),
+      );
+
+  LocationsCompanion _rowToLocation(dynamic row) => LocationsCompanion(
+        id:                 Value(row['id'] as String),
+        labId:              Value(row['lab_id'] as String),
+        name:               Value(row['name'] as String),
+        storageConditionId: Value(row['storage_condition_id'] as String?),
+        createdAt:          Value(DateTime.parse(row['created_at'] as String)),
+      );
+
+  SuppliersCompanion _rowToSupplier(dynamic row) => SuppliersCompanion(
+        id:           Value(row['id'] as String),
+        labId:        Value(row['lab_id'] as String),
+        name:         Value(row['name'] as String),
+        contactEmail: Value(row['contact_email'] as String?),
+        contactPhone: Value(row['contact_phone'] as String?),
+        createdAt:    Value(DateTime.parse(row['created_at'] as String)),
+      );
+
+  ProductsCompanion _rowToProduct(dynamic row) => ProductsCompanion(
+        id:                    Value(row['id'] as String),
+        labId:                 Value(row['lab_id'] as String),
+        name:                  Value(row['name'] as String),
+        barcode:               Value(row['barcode'] as String?),
+        categoryId:            Value(row['category_id'] as String?),
+        unit:                  Value(row['unit'] as String),
+        reorderPoint:          Value((row['reorder_point'] as num).toDouble()),
+        minimumStock:          Value((row['minimum_stock'] as num).toDouble()),
+        estimatedDeliveryDays: Value(row['estimated_delivery_days'] as int),
+        defaultLocationId:     Value(row['default_location_id'] as String?),
+        supplierId:            Value(row['supplier_id'] as String?),
+        isActive:              Value(row['is_active'] as bool),
+        createdAt:             Value(DateTime.parse(row['created_at'] as String)),
+        updatedAt:             Value(DateTime.parse(row['updated_at'] as String)),
+      );
+
+  LotsCompanion _rowToLot(dynamic row) => LotsCompanion(
+        id:             Value(row['id'] as String),
+        productId:      Value(row['product_id'] as String),
+        lotNumber:      Value(row['lot_number'] as String),
+        quantity:       Value((row['quantity'] as num).toDouble()),
+        expirationDate: Value(DateTime.parse(row['expiration_date'] as String)),
+        locationId:     Value(row['location_id'] as String?),
+        createdAt:      Value(DateTime.parse(row['created_at'] as String)),
+        updatedAt:      Value(DateTime.parse(row['updated_at'] as String)),
+      );
+
+  MovementsCompanion _rowToMovement(dynamic row) => MovementsCompanion(
+        id:        Value(row['id'] as String),
+        labId:     Value(row['lab_id'] as String),
+        productId: Value(row['product_id'] as String),
+        lotId:     Value(row['lot_id'] as String?),
+        type:      Value(row['type'] as String),
+        quantity:  Value((row['quantity'] as num).toDouble()),
+        reason:    Value(row['reason'] as String?),
+        area:      Value(row['area'] as String?),
+        project:   Value(row['project'] as String?),
+        userId:    Value(row['user_id'] as String),
+        createdAt: Value(DateTime.parse(row['created_at'] as String)),
+        isSynced:  const Value(true), // came from remote → already synced
+      );
+}
+
+// ── Connectivity watcher provider ─────────────────────────
+
+/// Emits a sync whenever the device comes back online.
+final connectivitySyncProvider = StreamProvider.autoDispose<void>((ref) async* {
+  await for (final result in Connectivity().onConnectivityChanged) {
+    if (result != ConnectivityResult.none) {
+      await ref.read(syncServiceProvider).syncAll();
+      yield null;
+    }
+  }
+});
