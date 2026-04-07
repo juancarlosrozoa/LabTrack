@@ -65,13 +65,12 @@ final productDetailProvider = StreamProvider.autoDispose
       as SupabaseInventoryRepository;
 
   await for (final lots in repo.watchLotsByProduct(productId)) {
-    final products = await repo.getProducts('');
-    final product  = products.where((p) => p.id == productId).firstOrNull;
+    final product = await repo.db.inventoryDao.getProductById(productId);
     if (product == null) {
       yield null;
       return;
     }
-    final total = lots.fold(0.0, (sum, l) => sum + l.quantity);
-    yield ProductWithStock(product: product, totalQuantity: total, lots: lots);
+    final total = lots.fold<double>(0.0, (sum, l) => sum + l.quantity);
+    yield ProductWithStock(product: repo.productFromRow(product), totalQuantity: total, lots: lots);
   }
 });

@@ -4,7 +4,6 @@ import 'package:uuid/uuid.dart';
 
 import '../local/database.dart';
 import '../local/database_provider.dart';
-import '../local/tables.dart';
 import '../models/product.dart' as model;
 import '../models/lot.dart' as model;
 import '../sync/sync_service.dart';
@@ -28,13 +27,13 @@ class SupabaseInventoryRepository implements InventoryRepository {
   @override
   Future<List<model.Product>> getProducts(String labId) async {
     final rows = await db.inventoryDao.getProducts(labId);
-    return rows.map(_productFromRow).toList();
+    return rows.map(productFromRow).toList();
   }
 
   @override
   Future<model.Product?> getProductByBarcode(String barcode) async {
     final row = await db.inventoryDao.getProductByBarcode(barcode);
-    return row == null ? null : _productFromRow(row);
+    return row == null ? null : productFromRow(row);
   }
 
   @override
@@ -95,7 +94,7 @@ class SupabaseInventoryRepository implements InventoryRepository {
   @override
   Future<List<model.Product>> getRestockNeeded(String labId) async {
     final rows = await db.inventoryDao.getRestockNeeded(labId);
-    return rows.map(_productFromRow).toList();
+    return rows.map(productFromRow).toList();
   }
 
   @override
@@ -115,7 +114,7 @@ class SupabaseInventoryRepository implements InventoryRepository {
   Stream<List<model.Product>> watchProducts(String labId) =>
       db.inventoryDao
           .watchProducts(labId)
-          .map((rows) => rows.map(_productFromRow).toList());
+          .map((rows) => rows.map(productFromRow).toList());
 
   Stream<List<model.Lot>> watchLotsByProduct(String productId) =>
       db.inventoryDao
@@ -124,7 +123,7 @@ class SupabaseInventoryRepository implements InventoryRepository {
 
   // ── Mappers ────────────────────────────────────────────
 
-  model.Product _productFromRow(Product row) => model.Product(
+  model.Product productFromRow(Product row) => model.Product(
         id:                    row.id,
         labId:                 row.labId,
         name:                  row.name,
