@@ -31,6 +31,37 @@ class Product extends Equatable {
     required this.createdAt,
   });
 
+  Product copyWith({
+    String?   id,
+    String?   labId,
+    String?   name,
+    String?   barcode,
+    String?   categoryId,
+    String?   unit,
+    double?   reorderPoint,
+    double?   minimumStock,
+    int?      estimatedDeliveryDays,
+    String?   locationId,
+    String?   supplierId,
+    bool?     isActive,
+    DateTime? createdAt,
+  }) =>
+      Product(
+        id:                    id                    ?? this.id,
+        labId:                 labId                 ?? this.labId,
+        name:                  name                  ?? this.name,
+        barcode:               barcode               ?? this.barcode,
+        categoryId:            categoryId            ?? this.categoryId,
+        unit:                  unit                  ?? this.unit,
+        reorderPoint:          reorderPoint          ?? this.reorderPoint,
+        minimumStock:          minimumStock          ?? this.minimumStock,
+        estimatedDeliveryDays: estimatedDeliveryDays ?? this.estimatedDeliveryDays,
+        locationId:            locationId            ?? this.locationId,
+        supplierId:            supplierId            ?? this.supplierId,
+        isActive:              isActive              ?? this.isActive,
+        createdAt:             createdAt             ?? this.createdAt,
+      );
+
   @override
   List<Object?> get props => [id];
 }
