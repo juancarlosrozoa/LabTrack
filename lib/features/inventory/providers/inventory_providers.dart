@@ -21,20 +21,17 @@ final inventoryProvider =
   // Kick off a background sync when provider is first watched
   ref.read(syncServiceProvider).syncAll();
 
-  await for (final products in repo.watchProducts(lab.labId)) {
-    final withStock = <ProductWithStock>[];
-
-    for (final product in products) {
-      final lots = await repo.getLotsByProduct(product.id);
-      final total = lots.fold(0.0, (sum, l) => sum + l.quantity);
-      withStock.add(ProductWithStock(
-        product:       product,
+  // Join-based watch: reacts to changes in both products AND lots tables
+  await for (final entries in
+      repo.db.inventoryDao.watchProductsWithLots(lab.labId)) {
+    yield entries.map((e) {
+      final total = e.lots.fold<double>(0.0, (sum, l) => sum + l.quantity);
+      return ProductWithStock(
+        product:       repo.productFromRow(e.product),
         totalQuantity: total,
-        lots:          lots,
-      ));
-    }
-
-    yield withStock;
+        lots:          e.lots.map(repo.lotFromRow).toList(),
+      );
+    }).toList();
   }
 });
 

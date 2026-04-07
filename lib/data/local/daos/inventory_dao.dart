@@ -69,6 +69,41 @@ class InventoryDao extends DatabaseAccessor<AppDatabase>
         .get();
   }
 
+  /// Reactive stream of active products joined with their lots.
+  /// Emits whenever either the products or lots table changes.
+  Stream<List<({Product product, List<Lot> lots})>> watchProductsWithLots(
+      String labId) {
+    return (select(products)
+          ..where((p) => p.labId.equals(labId) & p.isActive.equals(true))
+          ..orderBy([(p) => OrderingTerm.asc(p.name)]))
+        .join([leftOuterJoin(lots, lots.productId.equalsExp(products.id))])
+        .watch()
+        .map((rows) {
+          final productOrder = <String>[];
+          final productMap   = <String, Product>{};
+          final lotsMap      = <String, List<Lot>>{};
+
+          for (final row in rows) {
+            final product = row.readTable(products);
+            final lot     = row.readTableOrNull(lots);
+            if (!productMap.containsKey(product.id)) {
+              productOrder.add(product.id);
+              productMap[product.id] = product;
+            }
+            if (lot != null) {
+              lotsMap.putIfAbsent(product.id, () => []).add(lot);
+            }
+          }
+
+          return productOrder
+              .map((id) => (
+                    product: productMap[id]!,
+                    lots:    lotsMap[id] ?? <Lot>[],
+                  ))
+              .toList();
+        });
+  }
+
   Future<void> upsertLot(LotsCompanion lot) =>
       into(lots).insertOnConflictUpdate(lot);
 

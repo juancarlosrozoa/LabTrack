@@ -72,7 +72,7 @@ class SupabaseInventoryRepository implements InventoryRepository {
   @override
   Future<List<model.Lot>> getLotsByProduct(String productId) async {
     final rows = await db.inventoryDao.getLotsByProduct(productId);
-    return rows.map(_lotFromRow).toList();
+    return rows.map(lotFromRow).toList();
   }
 
   @override
@@ -106,7 +106,7 @@ class SupabaseInventoryRepository implements InventoryRepository {
       labId,
       withinDays: withinDays,
     );
-    return rows.map(_lotFromRow).toList();
+    return rows.map(lotFromRow).toList();
   }
 
   // ── Reactive streams (bonus — used directly by UI providers) ──
@@ -119,7 +119,7 @@ class SupabaseInventoryRepository implements InventoryRepository {
   Stream<List<model.Lot>> watchLotsByProduct(String productId) =>
       db.inventoryDao
           .watchLotsByProduct(productId)
-          .map((rows) => rows.map(_lotFromRow).toList());
+          .map((rows) => rows.map(lotFromRow).toList());
 
   // ── Mappers ────────────────────────────────────────────
 
@@ -156,7 +156,7 @@ class SupabaseInventoryRepository implements InventoryRepository {
         updatedAt:             Value(DateTime.now()),
       );
 
-  model.Lot _lotFromRow(Lot row) => model.Lot(
+  model.Lot lotFromRow(Lot row) => model.Lot(
         id:             row.id,
         productId:      row.productId,
         lotNumber:      row.lotNumber,
