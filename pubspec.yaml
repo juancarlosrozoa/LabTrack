@@ -43,6 +43,9 @@ dependencies:
   # Connectivity / offline detection
   connectivity_plus: ^6.1.4
 
+  # Sharing
+  share_plus: ^10.1.4
+
   # Utilities
   intl: ^0.20.2
   uuid: ^4.5.1
