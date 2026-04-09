@@ -1,4 +1,6 @@
+import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -65,6 +67,10 @@ class _ProductDetailView extends StatelessWidget {
           _StockSummaryCard(item: item),
           const SizedBox(height: 16),
 
+          // ── Barcode ───────────────────────────────
+          _BarcodeCard(product: product),
+          const SizedBox(height: 16),
+
           // ── Product info ──────────────────────────
           _SectionTitle('Product info'),
           _InfoCard(rows: [
@@ -110,6 +116,82 @@ class _ProductDetailView extends StatelessWidget {
             label: const Text('Entry'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Barcode card ──────────────────────────────────────────
+
+class _BarcodeCard extends StatelessWidget {
+  final dynamic product; // model.Product
+  const _BarcodeCard({required this.product});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme      = Theme.of(context);
+    // Use the product's barcode if set, otherwise use the internal ID
+    final code       = (product.barcode != null && product.barcode!.isNotEmpty)
+        ? product.barcode!
+        : product.id as String;
+    final isInternal = product.barcode == null || product.barcode!.isEmpty;
+
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+          Row(
+            children: [
+              Text('Barcode',
+                  style: theme.textTheme.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.bold)),
+              const Spacer(),
+              if (isInternal)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color:        theme.colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text('Internal',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onSecondaryContainer)),
+                ),
+              const SizedBox(width: 8),
+              IconButton(
+                icon:    const Icon(Icons.copy_outlined, size: 18),
+                tooltip: 'Copy code',
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: code));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content:  Text('Code copied to clipboard'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Center(
+            child: BarcodeWidget(
+              barcode:         Barcode.code128(),
+              data:            code,
+              width:           double.infinity,
+              height:          80,
+              drawText:        true,
+              style:           theme.textTheme.labelSmall,
+              backgroundColor: Colors.transparent,
+              color:           theme.colorScheme.onSurface,
+            ),
+          ),
+        ],
+        ),
       ),
     );
   }
