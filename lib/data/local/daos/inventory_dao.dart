@@ -160,4 +160,10 @@ class InventoryDao extends DatabaseAccessor<AppDatabase>
 
   Future<void> upsertAllSuppliers(List<SuppliersCompanion> rows) =>
       batch((b) => b.insertAllOnConflictUpdate(suppliers, rows));
+
+  Future<void> upsertSupplier(SuppliersCompanion row) =>
+      into(suppliers).insertOnConflictUpdate(row);
+
+  Future<void> deleteSupplierById(String id) =>
+      (delete(suppliers)..where((s) => s.id.equals(id))).go();
 }
