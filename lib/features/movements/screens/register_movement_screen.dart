@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../data/models/movement.dart';
 import '../../../data/models/product_with_stock.dart';
+import '../../../shared/screens/barcode_scanner_screen.dart';
 import '../../../shared/widgets/expiry_badge.dart';
 import '../../inventory/providers/inventory_providers.dart';
 import '../providers/movements_providers.dart';
@@ -122,11 +123,38 @@ class _RegisterMovementScreenState
         padding: const EdgeInsets.all(20),
         children: [
           // ── Product picker ────────────────────────
-          Text('Product',
-              style: Theme.of(context)
-                  .textTheme
-                  .labelLarge
-                  ?.copyWith(fontWeight: FontWeight.bold)),
+          Row(
+            children: [
+              Text('Product',
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelLarge
+                      ?.copyWith(fontWeight: FontWeight.bold)),
+              const Spacer(),
+              TextButton.icon(
+                icon:    const Icon(Icons.qr_code_scanner_outlined, size: 18),
+                label:   const Text('Scan'),
+                onPressed: () async {
+                  final messenger = ScaffoldMessenger.of(context);
+                  final code = await scanBarcode(context);
+                  if (code == null || !mounted) return;
+                  final match = items
+                      .where((p) => p.product.barcode == code)
+                      .firstOrNull;
+                  if (match != null) {
+                    setState(() {
+                      _selectedProduct = match;
+                      _selectedLotId   = null;
+                    });
+                  } else {
+                    messenger.showSnackBar(
+                      SnackBar(content: Text('No product found for "$code"')),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
           DropdownButtonFormField<ProductWithStock>(
             value:        _selectedProduct,

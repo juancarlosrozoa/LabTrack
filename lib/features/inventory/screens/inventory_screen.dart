@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../data/models/product_with_stock.dart';
+import '../../../shared/screens/barcode_scanner_screen.dart';
 import '../../../shared/widgets/product_card.dart';
 import '../providers/inventory_providers.dart';
 
@@ -42,7 +43,13 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           IconButton(
             icon:    const Icon(Icons.qr_code_scanner_outlined),
             tooltip: 'Scan barcode',
-            onPressed: () => context.push('/inventory/scan'),
+            onPressed: () async {
+              final code = await scanBarcode(context);
+              if (code != null && mounted) {
+                _searchCtrl.text = code;
+                ref.read(inventorySearchProvider.notifier).state = code;
+              }
+            },
           ),
         ],
       ),

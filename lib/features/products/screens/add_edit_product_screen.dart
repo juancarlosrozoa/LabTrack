@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../data/models/product.dart';
+import '../../../shared/screens/barcode_scanner_screen.dart';
 import '../../../data/repositories/supabase_inventory_repository.dart';
 import '../../auth/providers/lab_provider.dart';
 import '../providers/product_form_providers.dart';
@@ -178,9 +179,17 @@ class _AddEditProductScreenState
             _SectionLabel('Barcode (optional)'),
             TextFormField(
               controller: _barcodeCtrl,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText:   'e.g. 7647-14-5',
-                prefixIcon: Icon(Icons.qr_code),
+                prefixIcon: const Icon(Icons.qr_code),
+                suffixIcon: IconButton(
+                  icon:    const Icon(Icons.qr_code_scanner_outlined),
+                  tooltip: 'Scan barcode',
+                  onPressed: () async {
+                    final code = await scanBarcode(context);
+                    if (code != null) _barcodeCtrl.text = code;
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 16),
