@@ -14,7 +14,7 @@ enabled = false
 [db]
 port = 54322
 shadow_port = 54320
-major_version = 15
+major_version = 17
 
 [db.pooler]
 enabled = false
@@ -26,16 +26,7 @@ max_client_conn = 100
 [realtime]
 enabled = true
 ip_version = "IPv4"
-heartbeat_interval_ms = 30000
-jwt_claim_validators = {}
-max_channel_events_per_second = 100
-max_concurrent_users = 200
-max_events_per_second = 100
 max_header_length = 4096
-max_joins_per_second = 100
-poll_interval_ms = 100
-poll_max_changes = 100
-poll_max_record_bytes = 1048576
 
 [studio]
 enabled = true
