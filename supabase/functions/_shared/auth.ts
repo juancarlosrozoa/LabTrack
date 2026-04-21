@@ -17,11 +17,23 @@ export async function authenticateApiKey(req: Request): Promise<string> {
   const keyHash = await hashKey(rawKey)
 
   const { data, error } = await adminClient
-    .rpc('verify_api_key', { p_key_hash: keyHash })
+    .from('api_keys')
+    .select('lab_id')
+    .eq('key_hash', keyHash)
+    .eq('is_active', true)
+    .maybeSingle()
 
-  if (error || !data) throw new Error('Invalid or inactive API key')
+  if (error) throw new Error(`DB error: ${error.message}`)
+  if (!data) throw new Error('Invalid or inactive API key')
 
-  return data as string
+  // Update last_used_at in background
+  adminClient
+    .from('api_keys')
+    .update({ last_used_at: new Date().toISOString() })
+    .eq('key_hash', keyHash)
+    .then(() => {})
+
+  return data.lab_id as string
 }
 
 /** sha-256 hex of the raw API key */
