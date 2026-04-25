@@ -10,6 +10,30 @@
 import { handleCors } from '../_shared/cors.ts'
 import { adminClient, authenticateApiKey, errorResponse, jsonResponse } from '../_shared/auth.ts'
 
+/** Accepts X-Api-Key (external REST) or Supabase JWT (Flutter app). */
+async function authenticateRequest(req: Request): Promise<string> {
+  if (req.headers.get('x-api-key')) {
+    return await authenticateApiKey(req)
+  }
+
+  const auth = req.headers.get('authorization') ?? ''
+  if (!auth.startsWith('Bearer ')) throw new Error('Unauthorized')
+
+  const { data: { user }, error } = await adminClient.auth.getUser(
+    auth.replace('Bearer ', ''),
+  )
+  if (error || !user) throw new Error('Unauthorized')
+
+  const { data: membership } = await adminClient
+    .from('lab_memberships')
+    .select('lab_id')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (!membership) throw new Error('No lab membership found')
+  return membership.lab_id as string
+}
+
 const SERVICE_ACCOUNT_JSON = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_JSON')
 const SHEETS_SCOPE         = 'https://www.googleapis.com/auth/spreadsheets'
 
@@ -24,7 +48,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const lab_id = await authenticateApiKey(req)
+    const lab_id = await authenticateRequest(req)
 
     const { data: lab } = await adminClient
       .from('laboratories')

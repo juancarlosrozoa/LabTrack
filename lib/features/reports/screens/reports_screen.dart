@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/product_with_stock.dart';
 import '../providers/reports_providers.dart';
+import '../providers/sheets_sync_provider.dart';
 
 class ReportsScreen extends ConsumerWidget {
   const ReportsScreen({super.key});
@@ -27,19 +28,48 @@ class ReportsScreen extends ConsumerWidget {
   }
 }
 
-class _ReportView extends StatelessWidget {
+class _ReportView extends ConsumerWidget {
   final ReportData report;
   const _ReportView({required this.report});
 
   @override
-  Widget build(BuildContext context) {
-    final theme   = Theme.of(context);
-    final dateFmt = DateFormat('MMM d, yyyy  HH:mm');
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme      = Theme.of(context);
+    final dateFmt    = DateFormat('MMM d, yyyy  HH:mm');
+    final syncState  = ref.watch(sheetsSyncProvider);
+    final isSyncing  = syncState.isLoading;
+
+    ref.listen(sheetsSyncProvider, (_, next) {
+      if (next.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:         Text('Sync failed: ${next.error}'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ));
+      } else if (!next.isLoading && next.hasValue) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Google Sheets updated')),
+        );
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Reports'),
         actions: [
+          if (isSyncing)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: SizedBox(
+                width: 20, height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+          else
+            IconButton(
+              icon:    const Icon(Icons.table_chart_outlined),
+              tooltip: 'Sync to Google Sheets',
+              onPressed: () => ref.read(sheetsSyncProvider.notifier).sync(),
+            ),
           IconButton(
             icon:    const Icon(Icons.email_outlined),
             tooltip: 'Share via email',
