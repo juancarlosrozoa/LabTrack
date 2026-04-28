@@ -82,6 +82,12 @@ verify_jwt = false
 [functions.api-movements]
 verify_jwt = false
 
+[functions.send-push-notifications]
+verify_jwt = false
+
+[functions.check-stock-alerts]
+verify_jwt = false
+
 [analytics]
 enabled = false
 

@@ -3,6 +3,10 @@
 *.env
 dart_define.sh
 
+# Firebase config (contain API keys — keep out of git)
+google-services.json
+GoogleService-Info.plist
+
 # Miscellaneous
 *.class
 *.log
