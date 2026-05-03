@@ -70,6 +70,8 @@ class Products extends Table {
   TextColumn  get defaultLocationId     => text().nullable()();
   TextColumn  get supplierId            => text().nullable()();
   BoolColumn  get isActive              => boolean().withDefault(const Constant(true))();
+  BoolColumn  get tracksLots            => boolean().withDefault(const Constant(true))();
+  RealColumn  get directQuantity        => real().withDefault(const Constant(0.0))();
   DateTimeColumn get createdAt          => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt          => dateTime().withDefault(currentDateAndTime)();
 

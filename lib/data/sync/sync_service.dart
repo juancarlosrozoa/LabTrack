@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../local/database.dart';
 import '../local/database_provider.dart';
-import '../local/tables.dart';
 import '../remote/supabase_client.dart';
 import '../../features/auth/providers/lab_provider.dart';
 
@@ -24,10 +23,14 @@ class SyncService {
   final AppDatabase db;
   final String?     labId;
 
-  /// Full sync: pull remote → local, then push unsynced local → remote.
+  /// Full sync: push unsynced local → remote, then pull remote → local.
   Future<void> syncAll() async {
     if (labId == null) return;
     if (!await _isOnline()) return;
+
+    // Push first so Supabase triggers run before we pull updated data
+    await _pushLocalProducts();
+    await _pushUnsyncedMovements();
 
     await Future.wait([
       _pullCatalog(),   // categories, locations, suppliers
@@ -35,8 +38,6 @@ class SyncService {
       _pullLots(),
       _pullMovements(),
     ]);
-
-    await _pushUnsyncedMovements();
   }
 
   /// Push only — used right after registering a local movement.
@@ -108,6 +109,36 @@ class SyncService {
 
   // ── Push ────────────────────────────────────────────────
 
+  Future<void> _pushLocalProducts() async {
+    final products = await db.inventoryDao.getProducts(labId!);
+    if (products.isEmpty) return;
+
+    final rows = products.map((p) => {
+      'id':                      p.id,
+      'lab_id':                  p.labId,
+      'name':                    p.name,
+      'barcode':                 p.barcode,
+      'category_id':             p.categoryId,
+      'unit':                    p.unit,
+      'reorder_point':           p.reorderPoint,
+      'minimum_stock':           p.minimumStock,
+      'estimated_delivery_days': p.estimatedDeliveryDays,
+      'default_location_id':     p.defaultLocationId,
+      'supplier_id':             p.supplierId,
+      'is_active':               p.isActive,
+      'tracks_lots':             p.tracksLots,
+      'direct_quantity':         p.directQuantity,
+      'created_at':              p.createdAt.toIso8601String(),
+      'updated_at':              p.updatedAt.toIso8601String(),
+    }).toList();
+
+    try {
+      await supabase.from('products').upsert(rows);
+    } catch (_) {
+      // Leave for next sync if it fails
+    }
+  }
+
   Future<void> _pushUnsyncedMovements() async {
     final pending = await db.movementsDao.getUnsynced();
     if (pending.isEmpty) return;
@@ -138,7 +169,7 @@ class SyncService {
 
   Future<bool> _isOnline() async {
     final result = await Connectivity().checkConnectivity();
-    return result != ConnectivityResult.none;
+    return result.any((r) => r != ConnectivityResult.none);
   }
 
   // ── Row mappers ─────────────────────────────────────────
@@ -180,6 +211,8 @@ class SyncService {
         defaultLocationId:     Value(row['default_location_id'] as String?),
         supplierId:            Value(row['supplier_id'] as String?),
         isActive:              Value(row['is_active'] as bool),
+        tracksLots:            Value(row['tracks_lots'] as bool? ?? true),
+        directQuantity:        Value((row['direct_quantity'] as num?)?.toDouble() ?? 0.0),
         createdAt:             Value(DateTime.parse(row['created_at'] as String)),
         updatedAt:             Value(DateTime.parse(row['updated_at'] as String)),
       );
@@ -216,7 +249,7 @@ class SyncService {
 /// Emits a sync whenever the device comes back online.
 final connectivitySyncProvider = StreamProvider.autoDispose<void>((ref) async* {
   await for (final result in Connectivity().onConnectivityChanged) {
-    if (result != ConnectivityResult.none) {
+    if (result.any((r) => r != ConnectivityResult.none)) {
       await ref.read(syncServiceProvider).syncAll();
       yield null;
     }

@@ -30,6 +30,7 @@ class _AddEditProductScreenState
   String? _categoryId;
   String? _locationId;
   String? _supplierId;
+  bool    _tracksLots = true;
 
   bool _initialized = false;
 
@@ -66,6 +67,7 @@ class _AddEditProductScreenState
       _categoryId        = product.categoryId;
       _locationId        = product.defaultLocationId;
       _supplierId        = product.supplierId;
+      _tracksLots        = product.tracksLots;
     });
   }
 
@@ -89,6 +91,7 @@ class _AddEditProductScreenState
       estimatedDeliveryDays: int.tryParse(_deliveryCtrl.text)    ?? 7,
       locationId:            _locationId,
       supplierId:            _supplierId,
+      tracksLots:            _tracksLots,
       createdAt:             DateTime.now(),
     );
 
@@ -267,6 +270,19 @@ class _AddEditProductScreenState
               ),
             ),
             const SizedBox(height: 24),
+
+            // ── Lot tracking toggle ───────────────
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Track by lots'),
+              subtitle: const Text(
+                'Off: stock is tracked as a single running total.',
+                style: TextStyle(fontSize: 12),
+              ),
+              value:    _tracksLots,
+              onChanged: (v) => setState(() => _tracksLots = v),
+            ),
+            const SizedBox(height: 16),
 
             // ── Stock thresholds ──────────────────
             Text('Stock Thresholds',

@@ -22,26 +22,7 @@ class MovementsScreen extends ConsumerWidget {
             ? const _EmptyState()
             : _MovementsList(items: movements),
       ),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FloatingActionButton.small(
-            heroTag:   'exit_fab',
-            tooltip:   'Register exit',
-            onPressed: () => context.push('/movements/exit'),
-            backgroundColor: AppTheme.danger,
-            child: const Icon(Icons.remove, color: Colors.white),
-          ),
-          const SizedBox(height: 8),
-          FloatingActionButton.extended(
-            heroTag:   'entry_fab',
-            onPressed: () => context.push('/movements/entry'),
-            backgroundColor: AppTheme.success,
-            icon:  const Icon(Icons.add, color: Colors.white),
-            label: const Text('Entry', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
+      bottomNavigationBar: _ActionBar(),
     );
   }
 }
@@ -162,6 +143,71 @@ class _TypeBadge extends StatelessWidget {
           fontWeight: FontWeight.bold,
         ),
       ),
+    );
+  }
+}
+
+// ── Action bar ────────────────────────────────────────────
+
+class _ActionBar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+        child: Row(
+          children: [
+            Expanded(
+              child: _ActionButton(
+                label:     'Exit',
+                icon:      Icons.remove_circle_outline,
+                color:     AppTheme.danger,
+                onPressed: () => context.push('/movements/exit'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _ActionButton(
+                label:     'Entry',
+                icon:      Icons.add_circle_outline,
+                color:     AppTheme.success,
+                onPressed: () => context.push('/movements/entry'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  final String    label;
+  final IconData  icon;
+  final Color     color;
+  final VoidCallback onPressed;
+
+  const _ActionButton({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FilledButton.icon(
+      onPressed: onPressed,
+      style: FilledButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        padding:         const EdgeInsets.symmetric(vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+      ),
+      icon:  Icon(icon, size: 20),
+      label: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
     );
   }
 }

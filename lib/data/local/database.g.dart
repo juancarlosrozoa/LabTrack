@@ -1748,6 +1748,33 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _tracksLotsMeta = const VerificationMeta(
+    'tracksLots',
+  );
+  @override
+  late final GeneratedColumn<bool> tracksLots = GeneratedColumn<bool>(
+    'tracks_lots',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("tracks_lots" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _directQuantityMeta = const VerificationMeta(
+    'directQuantity',
+  );
+  @override
+  late final GeneratedColumn<double> directQuantity = GeneratedColumn<double>(
+    'direct_quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -1786,6 +1813,8 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
     defaultLocationId,
     supplierId,
     isActive,
+    tracksLots,
+    directQuantity,
     createdAt,
     updatedAt,
   ];
@@ -1890,6 +1919,21 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
         isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
       );
     }
+    if (data.containsKey('tracks_lots')) {
+      context.handle(
+        _tracksLotsMeta,
+        tracksLots.isAcceptableOrUnknown(data['tracks_lots']!, _tracksLotsMeta),
+      );
+    }
+    if (data.containsKey('direct_quantity')) {
+      context.handle(
+        _directQuantityMeta,
+        directQuantity.isAcceptableOrUnknown(
+          data['direct_quantity']!,
+          _directQuantityMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -1959,6 +2003,14 @@ class $ProductsTable extends Products with TableInfo<$ProductsTable, Product> {
         DriftSqlType.bool,
         data['${effectivePrefix}is_active'],
       )!,
+      tracksLots: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}tracks_lots'],
+      )!,
+      directQuantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}direct_quantity'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -1989,6 +2041,8 @@ class Product extends DataClass implements Insertable<Product> {
   final String? defaultLocationId;
   final String? supplierId;
   final bool isActive;
+  final bool tracksLots;
+  final double directQuantity;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Product({
@@ -2004,6 +2058,8 @@ class Product extends DataClass implements Insertable<Product> {
     this.defaultLocationId,
     this.supplierId,
     required this.isActive,
+    required this.tracksLots,
+    required this.directQuantity,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -2030,6 +2086,8 @@ class Product extends DataClass implements Insertable<Product> {
       map['supplier_id'] = Variable<String>(supplierId);
     }
     map['is_active'] = Variable<bool>(isActive);
+    map['tracks_lots'] = Variable<bool>(tracksLots);
+    map['direct_quantity'] = Variable<double>(directQuantity);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -2057,6 +2115,8 @@ class Product extends DataClass implements Insertable<Product> {
           ? const Value.absent()
           : Value(supplierId),
       isActive: Value(isActive),
+      tracksLots: Value(tracksLots),
+      directQuantity: Value(directQuantity),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -2084,6 +2144,8 @@ class Product extends DataClass implements Insertable<Product> {
       ),
       supplierId: serializer.fromJson<String?>(json['supplierId']),
       isActive: serializer.fromJson<bool>(json['isActive']),
+      tracksLots: serializer.fromJson<bool>(json['tracksLots']),
+      directQuantity: serializer.fromJson<double>(json['directQuantity']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -2104,6 +2166,8 @@ class Product extends DataClass implements Insertable<Product> {
       'defaultLocationId': serializer.toJson<String?>(defaultLocationId),
       'supplierId': serializer.toJson<String?>(supplierId),
       'isActive': serializer.toJson<bool>(isActive),
+      'tracksLots': serializer.toJson<bool>(tracksLots),
+      'directQuantity': serializer.toJson<double>(directQuantity),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -2122,6 +2186,8 @@ class Product extends DataClass implements Insertable<Product> {
     Value<String?> defaultLocationId = const Value.absent(),
     Value<String?> supplierId = const Value.absent(),
     bool? isActive,
+    bool? tracksLots,
+    double? directQuantity,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => Product(
@@ -2139,6 +2205,8 @@ class Product extends DataClass implements Insertable<Product> {
         : this.defaultLocationId,
     supplierId: supplierId.present ? supplierId.value : this.supplierId,
     isActive: isActive ?? this.isActive,
+    tracksLots: tracksLots ?? this.tracksLots,
+    directQuantity: directQuantity ?? this.directQuantity,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -2168,6 +2236,12 @@ class Product extends DataClass implements Insertable<Product> {
           ? data.supplierId.value
           : this.supplierId,
       isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      tracksLots: data.tracksLots.present
+          ? data.tracksLots.value
+          : this.tracksLots,
+      directQuantity: data.directQuantity.present
+          ? data.directQuantity.value
+          : this.directQuantity,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -2188,6 +2262,8 @@ class Product extends DataClass implements Insertable<Product> {
           ..write('defaultLocationId: $defaultLocationId, ')
           ..write('supplierId: $supplierId, ')
           ..write('isActive: $isActive, ')
+          ..write('tracksLots: $tracksLots, ')
+          ..write('directQuantity: $directQuantity, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -2208,6 +2284,8 @@ class Product extends DataClass implements Insertable<Product> {
     defaultLocationId,
     supplierId,
     isActive,
+    tracksLots,
+    directQuantity,
     createdAt,
     updatedAt,
   );
@@ -2227,6 +2305,8 @@ class Product extends DataClass implements Insertable<Product> {
           other.defaultLocationId == this.defaultLocationId &&
           other.supplierId == this.supplierId &&
           other.isActive == this.isActive &&
+          other.tracksLots == this.tracksLots &&
+          other.directQuantity == this.directQuantity &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -2244,6 +2324,8 @@ class ProductsCompanion extends UpdateCompanion<Product> {
   final Value<String?> defaultLocationId;
   final Value<String?> supplierId;
   final Value<bool> isActive;
+  final Value<bool> tracksLots;
+  final Value<double> directQuantity;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
@@ -2260,6 +2342,8 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     this.defaultLocationId = const Value.absent(),
     this.supplierId = const Value.absent(),
     this.isActive = const Value.absent(),
+    this.tracksLots = const Value.absent(),
+    this.directQuantity = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -2277,6 +2361,8 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     this.defaultLocationId = const Value.absent(),
     this.supplierId = const Value.absent(),
     this.isActive = const Value.absent(),
+    this.tracksLots = const Value.absent(),
+    this.directQuantity = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -2297,6 +2383,8 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     Expression<String>? defaultLocationId,
     Expression<String>? supplierId,
     Expression<bool>? isActive,
+    Expression<bool>? tracksLots,
+    Expression<double>? directQuantity,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -2315,6 +2403,8 @@ class ProductsCompanion extends UpdateCompanion<Product> {
       if (defaultLocationId != null) 'default_location_id': defaultLocationId,
       if (supplierId != null) 'supplier_id': supplierId,
       if (isActive != null) 'is_active': isActive,
+      if (tracksLots != null) 'tracks_lots': tracksLots,
+      if (directQuantity != null) 'direct_quantity': directQuantity,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -2334,6 +2424,8 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     Value<String?>? defaultLocationId,
     Value<String?>? supplierId,
     Value<bool>? isActive,
+    Value<bool>? tracksLots,
+    Value<double>? directQuantity,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
@@ -2352,6 +2444,8 @@ class ProductsCompanion extends UpdateCompanion<Product> {
       defaultLocationId: defaultLocationId ?? this.defaultLocationId,
       supplierId: supplierId ?? this.supplierId,
       isActive: isActive ?? this.isActive,
+      tracksLots: tracksLots ?? this.tracksLots,
+      directQuantity: directQuantity ?? this.directQuantity,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -2399,6 +2493,12 @@ class ProductsCompanion extends UpdateCompanion<Product> {
     if (isActive.present) {
       map['is_active'] = Variable<bool>(isActive.value);
     }
+    if (tracksLots.present) {
+      map['tracks_lots'] = Variable<bool>(tracksLots.value);
+    }
+    if (directQuantity.present) {
+      map['direct_quantity'] = Variable<double>(directQuantity.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -2426,6 +2526,8 @@ class ProductsCompanion extends UpdateCompanion<Product> {
           ..write('defaultLocationId: $defaultLocationId, ')
           ..write('supplierId: $supplierId, ')
           ..write('isActive: $isActive, ')
+          ..write('tracksLots: $tracksLots, ')
+          ..write('directQuantity: $directQuantity, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -4600,6 +4702,8 @@ typedef $$ProductsTableCreateCompanionBuilder =
       Value<String?> defaultLocationId,
       Value<String?> supplierId,
       Value<bool> isActive,
+      Value<bool> tracksLots,
+      Value<double> directQuantity,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<int> rowid,
@@ -4618,6 +4722,8 @@ typedef $$ProductsTableUpdateCompanionBuilder =
       Value<String?> defaultLocationId,
       Value<String?> supplierId,
       Value<bool> isActive,
+      Value<bool> tracksLots,
+      Value<double> directQuantity,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<int> rowid,
@@ -4731,6 +4837,16 @@ class $$ProductsTableFilterComposer
 
   ColumnFilters<bool> get isActive => $composableBuilder(
     column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get tracksLots => $composableBuilder(
+    column: $table.tracksLots,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get directQuantity => $composableBuilder(
+    column: $table.directQuantity,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4864,6 +4980,16 @@ class $$ProductsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get tracksLots => $composableBuilder(
+    column: $table.tracksLots,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get directQuantity => $composableBuilder(
+    column: $table.directQuantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -4931,6 +5057,16 @@ class $$ProductsTableAnnotationComposer
 
   GeneratedColumn<bool> get isActive =>
       $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  GeneratedColumn<bool> get tracksLots => $composableBuilder(
+    column: $table.tracksLots,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get directQuantity => $composableBuilder(
+    column: $table.directQuantity,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -5029,6 +5165,8 @@ class $$ProductsTableTableManager
                 Value<String?> defaultLocationId = const Value.absent(),
                 Value<String?> supplierId = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
+                Value<bool> tracksLots = const Value.absent(),
+                Value<double> directQuantity = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -5045,6 +5183,8 @@ class $$ProductsTableTableManager
                 defaultLocationId: defaultLocationId,
                 supplierId: supplierId,
                 isActive: isActive,
+                tracksLots: tracksLots,
+                directQuantity: directQuantity,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -5063,6 +5203,8 @@ class $$ProductsTableTableManager
                 Value<String?> defaultLocationId = const Value.absent(),
                 Value<String?> supplierId = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
+                Value<bool> tracksLots = const Value.absent(),
+                Value<double> directQuantity = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -5079,6 +5221,8 @@ class $$ProductsTableTableManager
                 defaultLocationId: defaultLocationId,
                 supplierId: supplierId,
                 isActive: isActive,
+                tracksLots: tracksLots,
+                directQuantity: directQuantity,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,

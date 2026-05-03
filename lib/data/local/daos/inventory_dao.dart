@@ -119,6 +119,22 @@ class InventoryDao extends DatabaseAccessor<AppDatabase>
         ),
       );
 
+  Future<void> updateDirectQuantity(String productId, double newQuantity) =>
+      (update(products)..where((p) => p.id.equals(productId))).write(
+        ProductsCompanion(
+          directQuantity: Value(newQuantity),
+          updatedAt:      Value(DateTime.now()),
+        ),
+      );
+
+  Future<void> softDeleteProduct(String productId) =>
+      (update(products)..where((p) => p.id.equals(productId))).write(
+        ProductsCompanion(
+          isActive:  const Value(false),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+
   // ── Total stock per product ────────────────────────────
 
   Future<double> getTotalStock(String productId) async {

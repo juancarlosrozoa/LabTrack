@@ -25,9 +25,12 @@ final inventoryProvider =
   await for (final entries in
       repo.db.inventoryDao.watchProductsWithLots(lab.labId)) {
     yield entries.map((e) {
-      final total = e.lots.fold<double>(0.0, (sum, l) => sum + l.quantity);
+      final product = repo.productFromRow(e.product);
+      final total = product.tracksLots
+          ? e.lots.fold<double>(0.0, (sum, l) => sum + l.quantity)
+          : product.directQuantity;
       return ProductWithStock(
-        product:       repo.productFromRow(e.product),
+        product:       product,
         totalQuantity: total,
         lots:          e.lots.map(repo.lotFromRow).toList(),
       );
@@ -67,7 +70,10 @@ final productDetailProvider = StreamProvider.autoDispose
       yield null;
       return;
     }
-    final total = lots.fold<double>(0.0, (sum, l) => sum + l.quantity);
-    yield ProductWithStock(product: repo.productFromRow(product), totalQuantity: total, lots: lots);
+    final p = repo.productFromRow(product);
+    final total = p.tracksLots
+        ? lots.fold<double>(0.0, (sum, l) => sum + l.quantity)
+        : p.directQuantity;
+    yield ProductWithStock(product: p, totalQuantity: total, lots: lots);
   }
 });

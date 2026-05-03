@@ -25,7 +25,7 @@ async function authenticateRequest(req: Request): Promise<string> {
   if (error || !user) throw new Error('Unauthorized')
 
   const { data: membership } = await adminClient
-    .from('lab_memberships')
+    .from('lab_members')
     .select('lab_id')
     .eq('user_id', user.id)
     .maybeSingle()
@@ -49,6 +49,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const lab_id = await authenticateRequest(req)
+    console.log('[sync] lab_id:', lab_id)
 
     const { data: lab } = await adminClient
       .from('laboratories')
@@ -57,15 +58,19 @@ Deno.serve(async (req: Request) => {
       .single()
 
     if (!lab) return errorResponse('Lab not found', 404)
+    console.log('[sync] lab:', lab.name)
 
     const spreadsheetId = Deno.env.get(
       `SHEETS_ID_${lab_id.replace(/-/g, '_')}`,
     )
     if (!spreadsheetId) {
+      console.log('[sync] No SHEETS_ID env var for lab', lab_id)
       return errorResponse('No spreadsheet configured for this lab', 404)
     }
+    console.log('[sync] spreadsheetId found')
 
     const token = await getGoogleAccessToken()
+    console.log('[sync] Google token obtained')
 
     const [stock, expiring, movements, restock] = await Promise.all([
       fetchStock(lab_id),
@@ -73,6 +78,7 @@ Deno.serve(async (req: Request) => {
       fetchMovements(lab_id),
       fetchRestock(lab_id),
     ])
+    console.log(`[sync] data fetched — stock:${stock.length} expiring:${expiring.length} movements:${movements.length} restock:${restock.length}`)
 
     await Promise.all([
       syncSheet(token, spreadsheetId, 'Stock',          buildStockRows(stock)),
@@ -80,6 +86,7 @@ Deno.serve(async (req: Request) => {
       syncSheet(token, spreadsheetId, 'Movements',      buildMovementRows(movements)),
       syncSheet(token, spreadsheetId, 'Restock Needed', buildRestockRows(restock)),
     ])
+    console.log('[sync] all sheets written')
 
     return jsonResponse({ synced: true, lab_id, lab_name: lab.name })
   } catch (err) {

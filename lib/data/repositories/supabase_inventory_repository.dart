@@ -6,6 +6,7 @@ import '../local/database.dart';
 import '../local/database_provider.dart';
 import '../models/product.dart' as model;
 import '../models/lot.dart' as model;
+import '../remote/supabase_client.dart';
 import '../sync/sync_service.dart';
 import 'inventory_repository.dart';
 
@@ -38,32 +39,29 @@ class SupabaseInventoryRepository implements InventoryRepository {
 
   @override
   Future<model.Product> createProduct(model.Product product) async {
-    final companion = _productToCompanion(product);
-    await db.inventoryDao.upsertProduct(companion);
+    await db.inventoryDao.upsertProduct(_productToCompanion(product));
+    await supabase.from('products').upsert(_productToMap(product));
     unawaited(sync.syncAll());
     return product;
   }
 
   @override
   Future<model.Product> updateProduct(model.Product product) async {
-    final companion = _productToCompanion(product);
-    await db.inventoryDao.upsertProduct(companion);
+    await db.inventoryDao.upsertProduct(_productToCompanion(product));
+    await supabase.from('products').upsert(_productToMap(product));
     unawaited(sync.syncAll());
     return product;
   }
 
   @override
   Future<void> deleteProduct(String productId) async {
-    // Soft-delete: mark as inactive locally + push to Supabase
     final existing = await db.inventoryDao.getProductById(productId);
     if (existing == null) return;
-    await db.inventoryDao.upsertProduct(
-      ProductsCompanion(
-        id:        Value(productId),
-        isActive:  const Value(false),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+    await db.inventoryDao.softDeleteProduct(productId);
+    await supabase
+        .from('products')
+        .update({'is_active': false, 'updated_at': DateTime.now().toIso8601String()})
+        .eq('id', productId);
     unawaited(sync.syncAll());
   }
 
@@ -136,8 +134,29 @@ class SupabaseInventoryRepository implements InventoryRepository {
         locationId:            row.defaultLocationId,
         supplierId:            row.supplierId,
         isActive:              row.isActive,
+        tracksLots:            row.tracksLots,
+        directQuantity:        row.directQuantity,
         createdAt:             row.createdAt,
       );
+
+  Map<String, dynamic> _productToMap(model.Product p) => {
+        'id':                      p.id.isNotEmpty ? p.id : const Uuid().v4(),
+        'lab_id':                  p.labId,
+        'name':                    p.name,
+        'barcode':                 p.barcode,
+        'category_id':             p.categoryId,
+        'unit':                    p.unit,
+        'reorder_point':           p.reorderPoint,
+        'minimum_stock':           p.minimumStock,
+        'estimated_delivery_days': p.estimatedDeliveryDays,
+        'default_location_id':     p.locationId,
+        'supplier_id':             p.supplierId,
+        'is_active':               p.isActive,
+        'tracks_lots':             p.tracksLots,
+        'direct_quantity':         p.directQuantity,
+        'created_at':              p.createdAt.toIso8601String(),
+        'updated_at':              DateTime.now().toIso8601String(),
+      };
 
   ProductsCompanion _productToCompanion(model.Product p) => ProductsCompanion(
         id:                    Value(p.id.isNotEmpty ? p.id : const Uuid().v4()),
@@ -152,6 +171,8 @@ class SupabaseInventoryRepository implements InventoryRepository {
         defaultLocationId:     Value(p.locationId),
         supplierId:            Value(p.supplierId),
         isActive:              Value(p.isActive),
+        tracksLots:            Value(p.tracksLots),
+        directQuantity:        Value(p.directQuantity),
         createdAt:             Value(p.createdAt),
         updatedAt:             Value(DateTime.now()),
       );

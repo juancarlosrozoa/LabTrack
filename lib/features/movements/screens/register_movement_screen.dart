@@ -26,19 +26,23 @@ class RegisterMovementScreen extends ConsumerStatefulWidget {
 
 class _RegisterMovementScreenState
     extends ConsumerState<RegisterMovementScreen> {
-  final _formKey    = GlobalKey<FormState>();
-  final _qtyCtrl    = TextEditingController();
-  final _reasonCtrl = TextEditingController();
-  final _areaCtrl   = TextEditingController();
+  final _formKey        = GlobalKey<FormState>();
+  final _qtyCtrl        = TextEditingController();
+  final _reasonCtrl     = TextEditingController();
+  final _areaCtrl       = TextEditingController();
+  final _lotNumberCtrl  = TextEditingController();
 
   ProductWithStock? _selectedProduct;
   String?           _selectedLotId;
+  DateTime?         _newLotExpiry;
+  bool              _createNewLot = false;
 
   @override
   void dispose() {
     _qtyCtrl.dispose();
     _reasonCtrl.dispose();
     _areaCtrl.dispose();
+    _lotNumberCtrl.dispose();
     super.dispose();
   }
 
@@ -63,15 +67,32 @@ class _RegisterMovementScreenState
 
     final qty = double.tryParse(_qtyCtrl.text.trim()) ?? 0;
 
+    if (_createNewLot && isEntry) {
+      if (_lotNumberCtrl.text.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Enter a lot number')),
+        );
+        return;
+      }
+      if (_newLotExpiry == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Select an expiration date')),
+        );
+        return;
+      }
+    }
+
     await ref.read(registerMovementProvider.notifier).register(
-          productId: _selectedProduct!.product.id,
-          lotId:     _selectedLotId,
-          type:      widget.type,
-          quantity:  qty,
-          reason:    _reasonCtrl.text.trim().isEmpty
+          productId:    _selectedProduct!.product.id,
+          lotId:        _createNewLot ? null : _selectedLotId,
+          type:         widget.type,
+          quantity:     qty,
+          newLotNumber: _createNewLot ? _lotNumberCtrl.text.trim() : null,
+          newLotExpiry: _createNewLot ? _newLotExpiry : null,
+          reason:       _reasonCtrl.text.trim().isEmpty
               ? null
               : _reasonCtrl.text.trim(),
-          area:      _areaCtrl.text.trim().isEmpty
+          area:         _areaCtrl.text.trim().isEmpty
               ? null
               : _areaCtrl.text.trim(),
         );
@@ -175,22 +196,75 @@ class _RegisterMovementScreenState
           ),
           const SizedBox(height: 20),
 
-          // ── Lot picker (only for exit/adjustment) ─
-          if (_selectedProduct != null) ...[
-            Text('Lot',
-                style: Theme.of(context)
-                    .textTheme
-                    .labelLarge
-                    ?.copyWith(fontWeight: FontWeight.bold)),
+          // ── Lot picker (only for lot-tracked products) ────
+          if (_selectedProduct != null &&
+              _selectedProduct!.product.tracksLots) ...[
+            Row(
+              children: [
+                Text('Lot',
+                    style: Theme.of(context)
+                        .textTheme
+                        .labelLarge
+                        ?.copyWith(fontWeight: FontWeight.bold)),
+                const Spacer(),
+                if (isEntry)
+                  TextButton.icon(
+                    icon:  Icon(_createNewLot
+                        ? Icons.list_outlined
+                        : Icons.add_outlined, size: 18),
+                    label: Text(_createNewLot ? 'Use existing' : 'New lot'),
+                    onPressed: () => setState(() {
+                      _createNewLot = !_createNewLot;
+                      _selectedLotId = null;
+                    }),
+                  ),
+              ],
+            ),
             const SizedBox(height: 8),
-            if (lots.isEmpty)
+            if (_createNewLot && isEntry) ...[
+              TextFormField(
+                controller: _lotNumberCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Lot number',
+                  hintText:  'e.g. LOT-2026-001',
+                ),
+              ),
+              const SizedBox(height: 12),
+              InkWell(
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context:     context,
+                    initialDate: DateTime.now().add(const Duration(days: 365)),
+                    firstDate:   DateTime.now(),
+                    lastDate:    DateTime.now().add(const Duration(days: 3650)),
+                  );
+                  if (picked != null) setState(() => _newLotExpiry = picked);
+                },
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText:  'Expiration date',
+                    suffixIcon: Icon(Icons.calendar_today_outlined, size: 18),
+                  ),
+                  child: Text(
+                    _newLotExpiry == null
+                        ? 'Select date'
+                        : '${_newLotExpiry!.year}-'
+                          '${_newLotExpiry!.month.toString().padLeft(2, '0')}-'
+                          '${_newLotExpiry!.day.toString().padLeft(2, '0')}',
+                    style: TextStyle(
+                      color: _newLotExpiry == null ? Colors.grey : null,
+                    ),
+                  ),
+                ),
+              ),
+            ] else if (lots.isEmpty)
               const Text('No lots with stock available.',
                   style: TextStyle(color: Colors.grey))
             else
               DropdownButtonFormField<String>(
                 initialValue: _selectedLotId,
-                hint:       const Text('Select a lot (optional)'),
-                isExpanded: true,
+                hint:         const Text('Select a lot (optional)'),
+                isExpanded:   true,
                 items: lots
                     .map((l) => DropdownMenuItem(
                           value: l.id,
@@ -203,14 +277,12 @@ class _RegisterMovementScreenState
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              ExpiryBadge(
-                                  expirationDate: l.expirationDate),
+                              ExpiryBadge(expirationDate: l.expirationDate),
                             ],
                           ),
                         ))
                     .toList(),
-                onChanged: (id) =>
-                    setState(() => _selectedLotId = id),
+                onChanged: (id) => setState(() => _selectedLotId = id),
               ),
             const SizedBox(height: 20),
           ],

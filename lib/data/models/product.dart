@@ -13,6 +13,8 @@ class Product extends Equatable {
   final String? locationId;
   final String? supplierId;
   final bool isActive;
+  final bool tracksLots;
+  final double directQuantity;
   final DateTime createdAt;
 
   const Product({
@@ -28,6 +30,8 @@ class Product extends Equatable {
     this.locationId,
     this.supplierId,
     this.isActive = true,
+    this.tracksLots = true,
+    this.directQuantity = 0,
     required this.createdAt,
   });
 
@@ -44,6 +48,8 @@ class Product extends Equatable {
     String?   locationId,
     String?   supplierId,
     bool?     isActive,
+    bool?     tracksLots,
+    double?   directQuantity,
     DateTime? createdAt,
   }) =>
       Product(
@@ -59,6 +65,8 @@ class Product extends Equatable {
         locationId:            locationId            ?? this.locationId,
         supplierId:            supplierId            ?? this.supplierId,
         isActive:              isActive              ?? this.isActive,
+        tracksLots:            tracksLots            ?? this.tracksLots,
+        directQuantity:        directQuantity        ?? this.directQuantity,
         createdAt:             createdAt             ?? this.createdAt,
       );
 

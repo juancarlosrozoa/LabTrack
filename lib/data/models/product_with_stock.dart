@@ -51,5 +51,5 @@ class ProductWithStock extends Equatable {
       daysUntilNextExpiry != null && daysUntilNextExpiry! <= 30;
 
   @override
-  List<Object?> get props => [product.id, totalQuantity];
+  List<Object?> get props => [product.id];
 }
