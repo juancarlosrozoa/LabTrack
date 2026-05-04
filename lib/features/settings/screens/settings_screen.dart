@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/models/lab_membership.dart';
 import '../../auth/providers/lab_provider.dart';
+import '../../help/screens/help_screen.dart';
 import '../providers/settings_providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -14,7 +15,7 @@ class SettingsScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Settings')),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: const [
+        children: [
           _LabSection(),
           SizedBox(height: 24),
           _AlertConfigSection(),
@@ -26,6 +27,8 @@ class SettingsScreen extends ConsumerWidget {
           _StorageConditionsSection(),
           SizedBox(height: 24),
           _SuppliersSection(),
+          SizedBox(height: 24),
+          _HelpTile(),
           SizedBox(height: 32),
         ],
       ),
@@ -834,4 +837,24 @@ class _Section extends StatelessWidget {
       ],
     );
   }
+}
+
+// ── Help tile ─────────────────────────────────────────────
+
+class _HelpTile extends StatelessWidget {
+  const _HelpTile();
+
+  @override
+  Widget build(BuildContext context) => Card(
+        margin: EdgeInsets.zero,
+        child: ListTile(
+          leading: const Icon(Icons.help_outline),
+          title:   const Text('Help & User Manual'),
+          subtitle: const Text('English · Français · Español'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const HelpScreen()),
+          ),
+        ),
+      );
 }
