@@ -95,6 +95,39 @@ class Lots extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+// ── Count sessions ────────────────────────────────────────
+
+class InventoryCountSessions extends Table {
+  TextColumn     get id               => text()();
+  TextColumn     get labId            => text()();
+  DateTimeColumn get countedAt        => dateTime()();
+  IntColumn      get totalCounted     => integer()();
+  IntColumn      get discrepancyCount => integer()();
+
+  @override
+  String get tableName => 'count_sessions';
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+class InventoryCountSessionItems extends Table {
+  TextColumn  get id          => text()();
+  TextColumn  get sessionId   =>
+      text().references(InventoryCountSessions, #id)();
+  TextColumn  get productId   => text()();
+  TextColumn  get productName => text()();
+  TextColumn  get unit        => text()();
+  RealColumn  get expected    => real()();
+  RealColumn  get counted     => real()();
+
+  @override
+  String get tableName => 'count_session_items';
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 // ── Movements ─────────────────────────────────────────────
 // isSynced = false → pending upload to Supabase
 

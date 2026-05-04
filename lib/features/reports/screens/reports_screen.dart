@@ -7,6 +7,9 @@ import '../../../core/theme/app_theme.dart';
 import '../../../data/models/product_with_stock.dart';
 import '../providers/reports_providers.dart';
 import '../providers/sheets_sync_provider.dart';
+import 'consumption_report_screen.dart';
+import 'count_history_screen.dart';
+import 'inventory_trend_screen.dart';
 
 class ReportsScreen extends ConsumerWidget {
   const ReportsScreen({super.key});
@@ -97,6 +100,45 @@ class _ReportView extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 12),
+
+          // ── Reports hub ───────────────────────────────
+          Row(
+            children: [
+              Expanded(
+                child: _ReportNavCard(
+                  icon:     Icons.trending_down_outlined,
+                  title:    'Consumption',
+                  subtitle: 'Usage by product',
+                  color:    AppTheme.danger,
+                  onTap:    () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const ConsumptionReportScreen())),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _ReportNavCard(
+                  icon:     Icons.show_chart_outlined,
+                  title:    'Trend',
+                  subtitle: 'Count over time',
+                  color:    theme.colorScheme.primary,
+                  onTap:    () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const InventoryTrendScreen())),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _ReportNavCard(
+                  icon:     Icons.history,
+                  title:    'History',
+                  subtitle: 'Count sessions',
+                  color:    AppTheme.warning,
+                  onTap:    () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const CountHistoryScreen())),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
 
           // ── KPI row ───────────────────────────────────
           Row(
@@ -388,6 +430,52 @@ class _ProductRow extends StatelessWidget {
               style: theme.textTheme.bodySmall?.copyWith(
                   color: trailingColor, fontWeight: FontWeight.w600)),
         ],
+      ),
+    );
+  }
+}
+
+class _ReportNavCard extends StatelessWidget {
+  final IconData icon;
+  final String   title;
+  final String   subtitle;
+  final Color    color;
+  final VoidCallback onTap;
+
+  const _ReportNavCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap:        onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+        decoration: BoxDecoration(
+          color:        color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+          border:       Border.all(color: color.withValues(alpha: 0.2)),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 22),
+            const SizedBox(height: 6),
+            Text(title,
+                style: theme.textTheme.labelMedium
+                    ?.copyWith(fontWeight: FontWeight.bold, color: color)),
+            Text(subtitle,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.labelSmall
+                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+          ],
+        ),
       ),
     );
   }

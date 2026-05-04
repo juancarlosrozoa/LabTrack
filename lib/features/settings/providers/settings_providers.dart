@@ -188,6 +188,220 @@ class SuppliersNotifier
   }
 }
 
+// ── Storage Conditions ────────────────────────────────────
+
+class StorageConditionItem {
+  final String  id;
+  final String  name;
+  final double? tempMin;
+  final double? tempMax;
+  final double? humidityMax;
+  final bool    lightSensitive;
+
+  const StorageConditionItem({
+    required this.id,
+    required this.name,
+    this.tempMin,
+    this.tempMax,
+    this.humidityMax,
+    this.lightSensitive = false,
+  });
+}
+
+final settingsStorageConditionsProvider = AsyncNotifierProvider.autoDispose<
+    StorageConditionsNotifier,
+    List<StorageConditionItem>>(StorageConditionsNotifier.new);
+
+class StorageConditionsNotifier
+    extends AutoDisposeAsyncNotifier<List<StorageConditionItem>> {
+  AppDatabase get _db  => ref.read(databaseProvider);
+  String?     get _lab => ref.read(selectedLabProvider)?.labId;
+
+  @override
+  Future<List<StorageConditionItem>> build() async {
+    final lab = ref.watch(selectedLabProvider);
+    if (lab == null) return [];
+    return await _reload(lab.labId);
+  }
+
+  Future<void> save(StorageConditionItem item) async {
+    final labId = _lab;
+    if (labId == null) return;
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await supabase.from('storage_conditions').upsert({
+        'id':              item.id,
+        'lab_id':          labId,
+        'name':            item.name,
+        'temp_min':        item.tempMin,
+        'temp_max':        item.tempMax,
+        'humidity_max':    item.humidityMax,
+        'light_sensitive': item.lightSensitive,
+      });
+      await _db.inventoryDao.upsertStorageCondition(
+        StorageConditionsCompanion(
+          id:             Value(item.id),
+          labId:          Value(labId),
+          name:           Value(item.name),
+          tempMin:        Value(item.tempMin),
+          tempMax:        Value(item.tempMax),
+          humidityMax:    Value(item.humidityMax),
+          lightSensitive: Value(item.lightSensitive),
+          createdAt:      Value(DateTime.now()),
+        ),
+      );
+      return await _reload(labId);
+    });
+  }
+
+  Future<void> delete(String id) async {
+    final labId = _lab;
+    if (labId == null) return;
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await supabase.from('storage_conditions').delete().eq('id', id);
+      await _db.inventoryDao.deleteStorageConditionById(id);
+      return await _reload(labId);
+    });
+  }
+
+  Future<List<StorageConditionItem>> _reload(String labId) async {
+    final rows = await _db.inventoryDao.getStorageConditions(labId);
+    return rows
+        .map((r) => StorageConditionItem(
+              id:             r.id,
+              name:           r.name,
+              tempMin:        r.tempMin,
+              tempMax:        r.tempMax,
+              humidityMax:    r.humidityMax,
+              lightSensitive: r.lightSensitive,
+            ))
+        .toList();
+  }
+}
+
+// ── Categories ────────────────────────────────────────────
+
+class CategoryItem {
+  final String id;
+  final String name;
+  const CategoryItem({required this.id, required this.name});
+}
+
+final settingsCategoriesProvider =
+    AsyncNotifierProvider.autoDispose<CategoriesNotifier, List<CategoryItem>>(
+        CategoriesNotifier.new);
+
+class CategoriesNotifier
+    extends AutoDisposeAsyncNotifier<List<CategoryItem>> {
+  AppDatabase get _db  => ref.read(databaseProvider);
+  String?     get _lab => ref.read(selectedLabProvider)?.labId;
+
+  @override
+  Future<List<CategoryItem>> build() async {
+    final lab = ref.watch(selectedLabProvider);
+    if (lab == null) return [];
+    return await _reload(lab.labId);
+  }
+
+  Future<void> save(CategoryItem item) async {
+    final labId = _lab;
+    if (labId == null) return;
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await supabase.from('categories').upsert({
+        'id':     item.id,
+        'lab_id': labId,
+        'name':   item.name,
+      });
+      await _db.inventoryDao.upsertCategory(CategoriesCompanion(
+        id:        Value(item.id),
+        labId:     Value(labId),
+        name:      Value(item.name),
+        createdAt: Value(DateTime.now()),
+      ));
+      return await _reload(labId);
+    });
+  }
+
+  Future<void> delete(String categoryId) async {
+    final labId = _lab;
+    if (labId == null) return;
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await supabase.from('categories').delete().eq('id', categoryId);
+      await _db.inventoryDao.deleteCategoryById(categoryId);
+      return await _reload(labId);
+    });
+  }
+
+  Future<List<CategoryItem>> _reload(String labId) async {
+    final rows = await _db.inventoryDao.getCategories(labId);
+    return rows.map((r) => CategoryItem(id: r.id, name: r.name)).toList();
+  }
+}
+
+// ── Locations ─────────────────────────────────────────────
+
+class LocationItem {
+  final String id;
+  final String name;
+  const LocationItem({required this.id, required this.name});
+}
+
+final settingsLocationsProvider =
+    AsyncNotifierProvider.autoDispose<LocationsNotifier, List<LocationItem>>(
+        LocationsNotifier.new);
+
+class LocationsNotifier
+    extends AutoDisposeAsyncNotifier<List<LocationItem>> {
+  AppDatabase get _db  => ref.read(databaseProvider);
+  String?     get _lab => ref.read(selectedLabProvider)?.labId;
+
+  @override
+  Future<List<LocationItem>> build() async {
+    final lab = ref.watch(selectedLabProvider);
+    if (lab == null) return [];
+    return await _reload(lab.labId);
+  }
+
+  Future<void> save(LocationItem item) async {
+    final labId = _lab;
+    if (labId == null) return;
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await supabase.from('locations').upsert({
+        'id':     item.id,
+        'lab_id': labId,
+        'name':   item.name,
+      });
+      await _db.inventoryDao.upsertLocation(LocationsCompanion(
+        id:        Value(item.id),
+        labId:     Value(labId),
+        name:      Value(item.name),
+        createdAt: Value(DateTime.now()),
+      ));
+      return await _reload(labId);
+    });
+  }
+
+  Future<void> delete(String locationId) async {
+    final labId = _lab;
+    if (labId == null) return;
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await supabase.from('locations').delete().eq('id', locationId);
+      await _db.inventoryDao.deleteLocationById(locationId);
+      return await _reload(labId);
+    });
+  }
+
+  Future<List<LocationItem>> _reload(String labId) async {
+    final rows = await _db.inventoryDao.getLocations(labId);
+    return rows.map((r) => LocationItem(id: r.id, name: r.name)).toList();
+  }
+}
+
 // ── Helper ─────────────────────────────────────────────────
 
 String newId() => const Uuid().v4();

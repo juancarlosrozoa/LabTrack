@@ -106,18 +106,15 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
 
 // ── Status filter chips ───────────────────────────────────
 
-final _statusFilterProvider =
-    StateProvider.autoDispose<StockStatus?>((ref) => null);
-
 class _StatusFilterChips extends ConsumerWidget {
   const _StatusFilterChips();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selected = ref.watch(_statusFilterProvider);
+    final selected = ref.watch(inventoryStatusFilterProvider);
 
     void pick(StockStatus? s) =>
-        ref.read(_statusFilterProvider.notifier).state =
+        ref.read(inventoryStatusFilterProvider.notifier).state =
             selected == s ? null : s;
 
     return SingleChildScrollView(

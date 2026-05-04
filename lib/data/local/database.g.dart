@@ -3798,6 +3798,859 @@ class MovementsCompanion extends UpdateCompanion<Movement> {
   }
 }
 
+class $InventoryCountSessionsTable extends InventoryCountSessions
+    with TableInfo<$InventoryCountSessionsTable, InventoryCountSession> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $InventoryCountSessionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _labIdMeta = const VerificationMeta('labId');
+  @override
+  late final GeneratedColumn<String> labId = GeneratedColumn<String>(
+    'lab_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _countedAtMeta = const VerificationMeta(
+    'countedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> countedAt = GeneratedColumn<DateTime>(
+    'counted_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _totalCountedMeta = const VerificationMeta(
+    'totalCounted',
+  );
+  @override
+  late final GeneratedColumn<int> totalCounted = GeneratedColumn<int>(
+    'total_counted',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _discrepancyCountMeta = const VerificationMeta(
+    'discrepancyCount',
+  );
+  @override
+  late final GeneratedColumn<int> discrepancyCount = GeneratedColumn<int>(
+    'discrepancy_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    labId,
+    countedAt,
+    totalCounted,
+    discrepancyCount,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'count_sessions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<InventoryCountSession> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('lab_id')) {
+      context.handle(
+        _labIdMeta,
+        labId.isAcceptableOrUnknown(data['lab_id']!, _labIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_labIdMeta);
+    }
+    if (data.containsKey('counted_at')) {
+      context.handle(
+        _countedAtMeta,
+        countedAt.isAcceptableOrUnknown(data['counted_at']!, _countedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_countedAtMeta);
+    }
+    if (data.containsKey('total_counted')) {
+      context.handle(
+        _totalCountedMeta,
+        totalCounted.isAcceptableOrUnknown(
+          data['total_counted']!,
+          _totalCountedMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_totalCountedMeta);
+    }
+    if (data.containsKey('discrepancy_count')) {
+      context.handle(
+        _discrepancyCountMeta,
+        discrepancyCount.isAcceptableOrUnknown(
+          data['discrepancy_count']!,
+          _discrepancyCountMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_discrepancyCountMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  InventoryCountSession map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return InventoryCountSession(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      labId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}lab_id'],
+      )!,
+      countedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}counted_at'],
+      )!,
+      totalCounted: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}total_counted'],
+      )!,
+      discrepancyCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}discrepancy_count'],
+      )!,
+    );
+  }
+
+  @override
+  $InventoryCountSessionsTable createAlias(String alias) {
+    return $InventoryCountSessionsTable(attachedDatabase, alias);
+  }
+}
+
+class InventoryCountSession extends DataClass
+    implements Insertable<InventoryCountSession> {
+  final String id;
+  final String labId;
+  final DateTime countedAt;
+  final int totalCounted;
+  final int discrepancyCount;
+  const InventoryCountSession({
+    required this.id,
+    required this.labId,
+    required this.countedAt,
+    required this.totalCounted,
+    required this.discrepancyCount,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['lab_id'] = Variable<String>(labId);
+    map['counted_at'] = Variable<DateTime>(countedAt);
+    map['total_counted'] = Variable<int>(totalCounted);
+    map['discrepancy_count'] = Variable<int>(discrepancyCount);
+    return map;
+  }
+
+  InventoryCountSessionsCompanion toCompanion(bool nullToAbsent) {
+    return InventoryCountSessionsCompanion(
+      id: Value(id),
+      labId: Value(labId),
+      countedAt: Value(countedAt),
+      totalCounted: Value(totalCounted),
+      discrepancyCount: Value(discrepancyCount),
+    );
+  }
+
+  factory InventoryCountSession.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return InventoryCountSession(
+      id: serializer.fromJson<String>(json['id']),
+      labId: serializer.fromJson<String>(json['labId']),
+      countedAt: serializer.fromJson<DateTime>(json['countedAt']),
+      totalCounted: serializer.fromJson<int>(json['totalCounted']),
+      discrepancyCount: serializer.fromJson<int>(json['discrepancyCount']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'labId': serializer.toJson<String>(labId),
+      'countedAt': serializer.toJson<DateTime>(countedAt),
+      'totalCounted': serializer.toJson<int>(totalCounted),
+      'discrepancyCount': serializer.toJson<int>(discrepancyCount),
+    };
+  }
+
+  InventoryCountSession copyWith({
+    String? id,
+    String? labId,
+    DateTime? countedAt,
+    int? totalCounted,
+    int? discrepancyCount,
+  }) => InventoryCountSession(
+    id: id ?? this.id,
+    labId: labId ?? this.labId,
+    countedAt: countedAt ?? this.countedAt,
+    totalCounted: totalCounted ?? this.totalCounted,
+    discrepancyCount: discrepancyCount ?? this.discrepancyCount,
+  );
+  InventoryCountSession copyWithCompanion(
+    InventoryCountSessionsCompanion data,
+  ) {
+    return InventoryCountSession(
+      id: data.id.present ? data.id.value : this.id,
+      labId: data.labId.present ? data.labId.value : this.labId,
+      countedAt: data.countedAt.present ? data.countedAt.value : this.countedAt,
+      totalCounted: data.totalCounted.present
+          ? data.totalCounted.value
+          : this.totalCounted,
+      discrepancyCount: data.discrepancyCount.present
+          ? data.discrepancyCount.value
+          : this.discrepancyCount,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryCountSession(')
+          ..write('id: $id, ')
+          ..write('labId: $labId, ')
+          ..write('countedAt: $countedAt, ')
+          ..write('totalCounted: $totalCounted, ')
+          ..write('discrepancyCount: $discrepancyCount')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, labId, countedAt, totalCounted, discrepancyCount);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is InventoryCountSession &&
+          other.id == this.id &&
+          other.labId == this.labId &&
+          other.countedAt == this.countedAt &&
+          other.totalCounted == this.totalCounted &&
+          other.discrepancyCount == this.discrepancyCount);
+}
+
+class InventoryCountSessionsCompanion
+    extends UpdateCompanion<InventoryCountSession> {
+  final Value<String> id;
+  final Value<String> labId;
+  final Value<DateTime> countedAt;
+  final Value<int> totalCounted;
+  final Value<int> discrepancyCount;
+  final Value<int> rowid;
+  const InventoryCountSessionsCompanion({
+    this.id = const Value.absent(),
+    this.labId = const Value.absent(),
+    this.countedAt = const Value.absent(),
+    this.totalCounted = const Value.absent(),
+    this.discrepancyCount = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  InventoryCountSessionsCompanion.insert({
+    required String id,
+    required String labId,
+    required DateTime countedAt,
+    required int totalCounted,
+    required int discrepancyCount,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       labId = Value(labId),
+       countedAt = Value(countedAt),
+       totalCounted = Value(totalCounted),
+       discrepancyCount = Value(discrepancyCount);
+  static Insertable<InventoryCountSession> custom({
+    Expression<String>? id,
+    Expression<String>? labId,
+    Expression<DateTime>? countedAt,
+    Expression<int>? totalCounted,
+    Expression<int>? discrepancyCount,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (labId != null) 'lab_id': labId,
+      if (countedAt != null) 'counted_at': countedAt,
+      if (totalCounted != null) 'total_counted': totalCounted,
+      if (discrepancyCount != null) 'discrepancy_count': discrepancyCount,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  InventoryCountSessionsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? labId,
+    Value<DateTime>? countedAt,
+    Value<int>? totalCounted,
+    Value<int>? discrepancyCount,
+    Value<int>? rowid,
+  }) {
+    return InventoryCountSessionsCompanion(
+      id: id ?? this.id,
+      labId: labId ?? this.labId,
+      countedAt: countedAt ?? this.countedAt,
+      totalCounted: totalCounted ?? this.totalCounted,
+      discrepancyCount: discrepancyCount ?? this.discrepancyCount,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (labId.present) {
+      map['lab_id'] = Variable<String>(labId.value);
+    }
+    if (countedAt.present) {
+      map['counted_at'] = Variable<DateTime>(countedAt.value);
+    }
+    if (totalCounted.present) {
+      map['total_counted'] = Variable<int>(totalCounted.value);
+    }
+    if (discrepancyCount.present) {
+      map['discrepancy_count'] = Variable<int>(discrepancyCount.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryCountSessionsCompanion(')
+          ..write('id: $id, ')
+          ..write('labId: $labId, ')
+          ..write('countedAt: $countedAt, ')
+          ..write('totalCounted: $totalCounted, ')
+          ..write('discrepancyCount: $discrepancyCount, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $InventoryCountSessionItemsTable extends InventoryCountSessionItems
+    with
+        TableInfo<$InventoryCountSessionItemsTable, InventoryCountSessionItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $InventoryCountSessionItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sessionIdMeta = const VerificationMeta(
+    'sessionId',
+  );
+  @override
+  late final GeneratedColumn<String> sessionId = GeneratedColumn<String>(
+    'session_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES count_sessions (id)',
+    ),
+  );
+  static const VerificationMeta _productIdMeta = const VerificationMeta(
+    'productId',
+  );
+  @override
+  late final GeneratedColumn<String> productId = GeneratedColumn<String>(
+    'product_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _productNameMeta = const VerificationMeta(
+    'productName',
+  );
+  @override
+  late final GeneratedColumn<String> productName = GeneratedColumn<String>(
+    'product_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+    'unit',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _expectedMeta = const VerificationMeta(
+    'expected',
+  );
+  @override
+  late final GeneratedColumn<double> expected = GeneratedColumn<double>(
+    'expected',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _countedMeta = const VerificationMeta(
+    'counted',
+  );
+  @override
+  late final GeneratedColumn<double> counted = GeneratedColumn<double>(
+    'counted',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    sessionId,
+    productId,
+    productName,
+    unit,
+    expected,
+    counted,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'count_session_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<InventoryCountSessionItem> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('session_id')) {
+      context.handle(
+        _sessionIdMeta,
+        sessionId.isAcceptableOrUnknown(data['session_id']!, _sessionIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sessionIdMeta);
+    }
+    if (data.containsKey('product_id')) {
+      context.handle(
+        _productIdMeta,
+        productId.isAcceptableOrUnknown(data['product_id']!, _productIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_productIdMeta);
+    }
+    if (data.containsKey('product_name')) {
+      context.handle(
+        _productNameMeta,
+        productName.isAcceptableOrUnknown(
+          data['product_name']!,
+          _productNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_productNameMeta);
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+        _unitMeta,
+        unit.isAcceptableOrUnknown(data['unit']!, _unitMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_unitMeta);
+    }
+    if (data.containsKey('expected')) {
+      context.handle(
+        _expectedMeta,
+        expected.isAcceptableOrUnknown(data['expected']!, _expectedMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_expectedMeta);
+    }
+    if (data.containsKey('counted')) {
+      context.handle(
+        _countedMeta,
+        counted.isAcceptableOrUnknown(data['counted']!, _countedMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_countedMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  InventoryCountSessionItem map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return InventoryCountSessionItem(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      sessionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}session_id'],
+      )!,
+      productId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}product_id'],
+      )!,
+      productName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}product_name'],
+      )!,
+      unit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unit'],
+      )!,
+      expected: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}expected'],
+      )!,
+      counted: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}counted'],
+      )!,
+    );
+  }
+
+  @override
+  $InventoryCountSessionItemsTable createAlias(String alias) {
+    return $InventoryCountSessionItemsTable(attachedDatabase, alias);
+  }
+}
+
+class InventoryCountSessionItem extends DataClass
+    implements Insertable<InventoryCountSessionItem> {
+  final String id;
+  final String sessionId;
+  final String productId;
+  final String productName;
+  final String unit;
+  final double expected;
+  final double counted;
+  const InventoryCountSessionItem({
+    required this.id,
+    required this.sessionId,
+    required this.productId,
+    required this.productName,
+    required this.unit,
+    required this.expected,
+    required this.counted,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['session_id'] = Variable<String>(sessionId);
+    map['product_id'] = Variable<String>(productId);
+    map['product_name'] = Variable<String>(productName);
+    map['unit'] = Variable<String>(unit);
+    map['expected'] = Variable<double>(expected);
+    map['counted'] = Variable<double>(counted);
+    return map;
+  }
+
+  InventoryCountSessionItemsCompanion toCompanion(bool nullToAbsent) {
+    return InventoryCountSessionItemsCompanion(
+      id: Value(id),
+      sessionId: Value(sessionId),
+      productId: Value(productId),
+      productName: Value(productName),
+      unit: Value(unit),
+      expected: Value(expected),
+      counted: Value(counted),
+    );
+  }
+
+  factory InventoryCountSessionItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return InventoryCountSessionItem(
+      id: serializer.fromJson<String>(json['id']),
+      sessionId: serializer.fromJson<String>(json['sessionId']),
+      productId: serializer.fromJson<String>(json['productId']),
+      productName: serializer.fromJson<String>(json['productName']),
+      unit: serializer.fromJson<String>(json['unit']),
+      expected: serializer.fromJson<double>(json['expected']),
+      counted: serializer.fromJson<double>(json['counted']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'sessionId': serializer.toJson<String>(sessionId),
+      'productId': serializer.toJson<String>(productId),
+      'productName': serializer.toJson<String>(productName),
+      'unit': serializer.toJson<String>(unit),
+      'expected': serializer.toJson<double>(expected),
+      'counted': serializer.toJson<double>(counted),
+    };
+  }
+
+  InventoryCountSessionItem copyWith({
+    String? id,
+    String? sessionId,
+    String? productId,
+    String? productName,
+    String? unit,
+    double? expected,
+    double? counted,
+  }) => InventoryCountSessionItem(
+    id: id ?? this.id,
+    sessionId: sessionId ?? this.sessionId,
+    productId: productId ?? this.productId,
+    productName: productName ?? this.productName,
+    unit: unit ?? this.unit,
+    expected: expected ?? this.expected,
+    counted: counted ?? this.counted,
+  );
+  InventoryCountSessionItem copyWithCompanion(
+    InventoryCountSessionItemsCompanion data,
+  ) {
+    return InventoryCountSessionItem(
+      id: data.id.present ? data.id.value : this.id,
+      sessionId: data.sessionId.present ? data.sessionId.value : this.sessionId,
+      productId: data.productId.present ? data.productId.value : this.productId,
+      productName: data.productName.present
+          ? data.productName.value
+          : this.productName,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      expected: data.expected.present ? data.expected.value : this.expected,
+      counted: data.counted.present ? data.counted.value : this.counted,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryCountSessionItem(')
+          ..write('id: $id, ')
+          ..write('sessionId: $sessionId, ')
+          ..write('productId: $productId, ')
+          ..write('productName: $productName, ')
+          ..write('unit: $unit, ')
+          ..write('expected: $expected, ')
+          ..write('counted: $counted')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    sessionId,
+    productId,
+    productName,
+    unit,
+    expected,
+    counted,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is InventoryCountSessionItem &&
+          other.id == this.id &&
+          other.sessionId == this.sessionId &&
+          other.productId == this.productId &&
+          other.productName == this.productName &&
+          other.unit == this.unit &&
+          other.expected == this.expected &&
+          other.counted == this.counted);
+}
+
+class InventoryCountSessionItemsCompanion
+    extends UpdateCompanion<InventoryCountSessionItem> {
+  final Value<String> id;
+  final Value<String> sessionId;
+  final Value<String> productId;
+  final Value<String> productName;
+  final Value<String> unit;
+  final Value<double> expected;
+  final Value<double> counted;
+  final Value<int> rowid;
+  const InventoryCountSessionItemsCompanion({
+    this.id = const Value.absent(),
+    this.sessionId = const Value.absent(),
+    this.productId = const Value.absent(),
+    this.productName = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.expected = const Value.absent(),
+    this.counted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  InventoryCountSessionItemsCompanion.insert({
+    required String id,
+    required String sessionId,
+    required String productId,
+    required String productName,
+    required String unit,
+    required double expected,
+    required double counted,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       sessionId = Value(sessionId),
+       productId = Value(productId),
+       productName = Value(productName),
+       unit = Value(unit),
+       expected = Value(expected),
+       counted = Value(counted);
+  static Insertable<InventoryCountSessionItem> custom({
+    Expression<String>? id,
+    Expression<String>? sessionId,
+    Expression<String>? productId,
+    Expression<String>? productName,
+    Expression<String>? unit,
+    Expression<double>? expected,
+    Expression<double>? counted,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (sessionId != null) 'session_id': sessionId,
+      if (productId != null) 'product_id': productId,
+      if (productName != null) 'product_name': productName,
+      if (unit != null) 'unit': unit,
+      if (expected != null) 'expected': expected,
+      if (counted != null) 'counted': counted,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  InventoryCountSessionItemsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? sessionId,
+    Value<String>? productId,
+    Value<String>? productName,
+    Value<String>? unit,
+    Value<double>? expected,
+    Value<double>? counted,
+    Value<int>? rowid,
+  }) {
+    return InventoryCountSessionItemsCompanion(
+      id: id ?? this.id,
+      sessionId: sessionId ?? this.sessionId,
+      productId: productId ?? this.productId,
+      productName: productName ?? this.productName,
+      unit: unit ?? this.unit,
+      expected: expected ?? this.expected,
+      counted: counted ?? this.counted,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (sessionId.present) {
+      map['session_id'] = Variable<String>(sessionId.value);
+    }
+    if (productId.present) {
+      map['product_id'] = Variable<String>(productId.value);
+    }
+    if (productName.present) {
+      map['product_name'] = Variable<String>(productName.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (expected.present) {
+      map['expected'] = Variable<double>(expected.value);
+    }
+    if (counted.present) {
+      map['counted'] = Variable<double>(counted.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryCountSessionItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('sessionId: $sessionId, ')
+          ..write('productId: $productId, ')
+          ..write('productName: $productName, ')
+          ..write('unit: $unit, ')
+          ..write('expected: $expected, ')
+          ..write('counted: $counted, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3809,8 +4662,15 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ProductsTable products = $ProductsTable(this);
   late final $LotsTable lots = $LotsTable(this);
   late final $MovementsTable movements = $MovementsTable(this);
+  late final $InventoryCountSessionsTable inventoryCountSessions =
+      $InventoryCountSessionsTable(this);
+  late final $InventoryCountSessionItemsTable inventoryCountSessionItems =
+      $InventoryCountSessionItemsTable(this);
   late final InventoryDao inventoryDao = InventoryDao(this as AppDatabase);
   late final MovementsDao movementsDao = MovementsDao(this as AppDatabase);
+  late final CountSessionDao countSessionDao = CountSessionDao(
+    this as AppDatabase,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3823,6 +4683,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     products,
     lots,
     movements,
+    inventoryCountSessions,
+    inventoryCountSessionItems,
   ];
 }
 
@@ -6142,6 +7004,740 @@ typedef $$MovementsTableProcessedTableManager =
       Movement,
       PrefetchHooks Function({bool productId})
     >;
+typedef $$InventoryCountSessionsTableCreateCompanionBuilder =
+    InventoryCountSessionsCompanion Function({
+      required String id,
+      required String labId,
+      required DateTime countedAt,
+      required int totalCounted,
+      required int discrepancyCount,
+      Value<int> rowid,
+    });
+typedef $$InventoryCountSessionsTableUpdateCompanionBuilder =
+    InventoryCountSessionsCompanion Function({
+      Value<String> id,
+      Value<String> labId,
+      Value<DateTime> countedAt,
+      Value<int> totalCounted,
+      Value<int> discrepancyCount,
+      Value<int> rowid,
+    });
+
+final class $$InventoryCountSessionsTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $InventoryCountSessionsTable,
+          InventoryCountSession
+        > {
+  $$InventoryCountSessionsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<
+    $InventoryCountSessionItemsTable,
+    List<InventoryCountSessionItem>
+  >
+  _inventoryCountSessionItemsRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.inventoryCountSessionItems,
+        aliasName: $_aliasNameGenerator(
+          db.inventoryCountSessions.id,
+          db.inventoryCountSessionItems.sessionId,
+        ),
+      );
+
+  $$InventoryCountSessionItemsTableProcessedTableManager
+  get inventoryCountSessionItemsRefs {
+    final manager = $$InventoryCountSessionItemsTableTableManager(
+      $_db,
+      $_db.inventoryCountSessionItems,
+    ).filter((f) => f.sessionId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _inventoryCountSessionItemsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$InventoryCountSessionsTableFilterComposer
+    extends Composer<_$AppDatabase, $InventoryCountSessionsTable> {
+  $$InventoryCountSessionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get labId => $composableBuilder(
+    column: $table.labId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get countedAt => $composableBuilder(
+    column: $table.countedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get totalCounted => $composableBuilder(
+    column: $table.totalCounted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get discrepancyCount => $composableBuilder(
+    column: $table.discrepancyCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> inventoryCountSessionItemsRefs(
+    Expression<bool> Function($$InventoryCountSessionItemsTableFilterComposer f)
+    f,
+  ) {
+    final $$InventoryCountSessionItemsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.inventoryCountSessionItems,
+          getReferencedColumn: (t) => t.sessionId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$InventoryCountSessionItemsTableFilterComposer(
+                $db: $db,
+                $table: $db.inventoryCountSessionItems,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$InventoryCountSessionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $InventoryCountSessionsTable> {
+  $$InventoryCountSessionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get labId => $composableBuilder(
+    column: $table.labId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get countedAt => $composableBuilder(
+    column: $table.countedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get totalCounted => $composableBuilder(
+    column: $table.totalCounted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get discrepancyCount => $composableBuilder(
+    column: $table.discrepancyCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$InventoryCountSessionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $InventoryCountSessionsTable> {
+  $$InventoryCountSessionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get labId =>
+      $composableBuilder(column: $table.labId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get countedAt =>
+      $composableBuilder(column: $table.countedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get totalCounted => $composableBuilder(
+    column: $table.totalCounted,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get discrepancyCount => $composableBuilder(
+    column: $table.discrepancyCount,
+    builder: (column) => column,
+  );
+
+  Expression<T> inventoryCountSessionItemsRefs<T extends Object>(
+    Expression<T> Function(
+      $$InventoryCountSessionItemsTableAnnotationComposer a,
+    )
+    f,
+  ) {
+    final $$InventoryCountSessionItemsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.inventoryCountSessionItems,
+          getReferencedColumn: (t) => t.sessionId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$InventoryCountSessionItemsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.inventoryCountSessionItems,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$InventoryCountSessionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $InventoryCountSessionsTable,
+          InventoryCountSession,
+          $$InventoryCountSessionsTableFilterComposer,
+          $$InventoryCountSessionsTableOrderingComposer,
+          $$InventoryCountSessionsTableAnnotationComposer,
+          $$InventoryCountSessionsTableCreateCompanionBuilder,
+          $$InventoryCountSessionsTableUpdateCompanionBuilder,
+          (InventoryCountSession, $$InventoryCountSessionsTableReferences),
+          InventoryCountSession,
+          PrefetchHooks Function({bool inventoryCountSessionItemsRefs})
+        > {
+  $$InventoryCountSessionsTableTableManager(
+    _$AppDatabase db,
+    $InventoryCountSessionsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$InventoryCountSessionsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$InventoryCountSessionsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$InventoryCountSessionsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> labId = const Value.absent(),
+                Value<DateTime> countedAt = const Value.absent(),
+                Value<int> totalCounted = const Value.absent(),
+                Value<int> discrepancyCount = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InventoryCountSessionsCompanion(
+                id: id,
+                labId: labId,
+                countedAt: countedAt,
+                totalCounted: totalCounted,
+                discrepancyCount: discrepancyCount,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String labId,
+                required DateTime countedAt,
+                required int totalCounted,
+                required int discrepancyCount,
+                Value<int> rowid = const Value.absent(),
+              }) => InventoryCountSessionsCompanion.insert(
+                id: id,
+                labId: labId,
+                countedAt: countedAt,
+                totalCounted: totalCounted,
+                discrepancyCount: discrepancyCount,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$InventoryCountSessionsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({inventoryCountSessionItemsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (inventoryCountSessionItemsRefs)
+                  db.inventoryCountSessionItems,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (inventoryCountSessionItemsRefs)
+                    await $_getPrefetchedData<
+                      InventoryCountSession,
+                      $InventoryCountSessionsTable,
+                      InventoryCountSessionItem
+                    >(
+                      currentTable: table,
+                      referencedTable: $$InventoryCountSessionsTableReferences
+                          ._inventoryCountSessionItemsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$InventoryCountSessionsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).inventoryCountSessionItemsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.sessionId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$InventoryCountSessionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $InventoryCountSessionsTable,
+      InventoryCountSession,
+      $$InventoryCountSessionsTableFilterComposer,
+      $$InventoryCountSessionsTableOrderingComposer,
+      $$InventoryCountSessionsTableAnnotationComposer,
+      $$InventoryCountSessionsTableCreateCompanionBuilder,
+      $$InventoryCountSessionsTableUpdateCompanionBuilder,
+      (InventoryCountSession, $$InventoryCountSessionsTableReferences),
+      InventoryCountSession,
+      PrefetchHooks Function({bool inventoryCountSessionItemsRefs})
+    >;
+typedef $$InventoryCountSessionItemsTableCreateCompanionBuilder =
+    InventoryCountSessionItemsCompanion Function({
+      required String id,
+      required String sessionId,
+      required String productId,
+      required String productName,
+      required String unit,
+      required double expected,
+      required double counted,
+      Value<int> rowid,
+    });
+typedef $$InventoryCountSessionItemsTableUpdateCompanionBuilder =
+    InventoryCountSessionItemsCompanion Function({
+      Value<String> id,
+      Value<String> sessionId,
+      Value<String> productId,
+      Value<String> productName,
+      Value<String> unit,
+      Value<double> expected,
+      Value<double> counted,
+      Value<int> rowid,
+    });
+
+final class $$InventoryCountSessionItemsTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $InventoryCountSessionItemsTable,
+          InventoryCountSessionItem
+        > {
+  $$InventoryCountSessionItemsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $InventoryCountSessionsTable _sessionIdTable(_$AppDatabase db) =>
+      db.inventoryCountSessions.createAlias(
+        $_aliasNameGenerator(
+          db.inventoryCountSessionItems.sessionId,
+          db.inventoryCountSessions.id,
+        ),
+      );
+
+  $$InventoryCountSessionsTableProcessedTableManager get sessionId {
+    final $_column = $_itemColumn<String>('session_id')!;
+
+    final manager = $$InventoryCountSessionsTableTableManager(
+      $_db,
+      $_db.inventoryCountSessions,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_sessionIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$InventoryCountSessionItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $InventoryCountSessionItemsTable> {
+  $$InventoryCountSessionItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get productName => $composableBuilder(
+    column: $table.productName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get expected => $composableBuilder(
+    column: $table.expected,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get counted => $composableBuilder(
+    column: $table.counted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$InventoryCountSessionsTableFilterComposer get sessionId {
+    final $$InventoryCountSessionsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.sessionId,
+          referencedTable: $db.inventoryCountSessions,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$InventoryCountSessionsTableFilterComposer(
+                $db: $db,
+                $table: $db.inventoryCountSessions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$InventoryCountSessionItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $InventoryCountSessionItemsTable> {
+  $$InventoryCountSessionItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get productName => $composableBuilder(
+    column: $table.productName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get expected => $composableBuilder(
+    column: $table.expected,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get counted => $composableBuilder(
+    column: $table.counted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$InventoryCountSessionsTableOrderingComposer get sessionId {
+    final $$InventoryCountSessionsTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.sessionId,
+          referencedTable: $db.inventoryCountSessions,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$InventoryCountSessionsTableOrderingComposer(
+                $db: $db,
+                $table: $db.inventoryCountSessions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$InventoryCountSessionItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $InventoryCountSessionItemsTable> {
+  $$InventoryCountSessionItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get productId =>
+      $composableBuilder(column: $table.productId, builder: (column) => column);
+
+  GeneratedColumn<String> get productName => $composableBuilder(
+    column: $table.productName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<double> get expected =>
+      $composableBuilder(column: $table.expected, builder: (column) => column);
+
+  GeneratedColumn<double> get counted =>
+      $composableBuilder(column: $table.counted, builder: (column) => column);
+
+  $$InventoryCountSessionsTableAnnotationComposer get sessionId {
+    final $$InventoryCountSessionsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.sessionId,
+          referencedTable: $db.inventoryCountSessions,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$InventoryCountSessionsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.inventoryCountSessions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+}
+
+class $$InventoryCountSessionItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $InventoryCountSessionItemsTable,
+          InventoryCountSessionItem,
+          $$InventoryCountSessionItemsTableFilterComposer,
+          $$InventoryCountSessionItemsTableOrderingComposer,
+          $$InventoryCountSessionItemsTableAnnotationComposer,
+          $$InventoryCountSessionItemsTableCreateCompanionBuilder,
+          $$InventoryCountSessionItemsTableUpdateCompanionBuilder,
+          (
+            InventoryCountSessionItem,
+            $$InventoryCountSessionItemsTableReferences,
+          ),
+          InventoryCountSessionItem,
+          PrefetchHooks Function({bool sessionId})
+        > {
+  $$InventoryCountSessionItemsTableTableManager(
+    _$AppDatabase db,
+    $InventoryCountSessionItemsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$InventoryCountSessionItemsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$InventoryCountSessionItemsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$InventoryCountSessionItemsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> sessionId = const Value.absent(),
+                Value<String> productId = const Value.absent(),
+                Value<String> productName = const Value.absent(),
+                Value<String> unit = const Value.absent(),
+                Value<double> expected = const Value.absent(),
+                Value<double> counted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InventoryCountSessionItemsCompanion(
+                id: id,
+                sessionId: sessionId,
+                productId: productId,
+                productName: productName,
+                unit: unit,
+                expected: expected,
+                counted: counted,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String sessionId,
+                required String productId,
+                required String productName,
+                required String unit,
+                required double expected,
+                required double counted,
+                Value<int> rowid = const Value.absent(),
+              }) => InventoryCountSessionItemsCompanion.insert(
+                id: id,
+                sessionId: sessionId,
+                productId: productId,
+                productName: productName,
+                unit: unit,
+                expected: expected,
+                counted: counted,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$InventoryCountSessionItemsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({sessionId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (sessionId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.sessionId,
+                                referencedTable:
+                                    $$InventoryCountSessionItemsTableReferences
+                                        ._sessionIdTable(db),
+                                referencedColumn:
+                                    $$InventoryCountSessionItemsTableReferences
+                                        ._sessionIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$InventoryCountSessionItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $InventoryCountSessionItemsTable,
+      InventoryCountSessionItem,
+      $$InventoryCountSessionItemsTableFilterComposer,
+      $$InventoryCountSessionItemsTableOrderingComposer,
+      $$InventoryCountSessionItemsTableAnnotationComposer,
+      $$InventoryCountSessionItemsTableCreateCompanionBuilder,
+      $$InventoryCountSessionItemsTableUpdateCompanionBuilder,
+      (InventoryCountSessionItem, $$InventoryCountSessionItemsTableReferences),
+      InventoryCountSessionItem,
+      PrefetchHooks Function({bool sessionId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -6159,4 +7755,15 @@ class $AppDatabaseManager {
   $$LotsTableTableManager get lots => $$LotsTableTableManager(_db, _db.lots);
   $$MovementsTableTableManager get movements =>
       $$MovementsTableTableManager(_db, _db.movements);
+  $$InventoryCountSessionsTableTableManager get inventoryCountSessions =>
+      $$InventoryCountSessionsTableTableManager(
+        _db,
+        _db.inventoryCountSessions,
+      );
+  $$InventoryCountSessionItemsTableTableManager
+  get inventoryCountSessionItems =>
+      $$InventoryCountSessionItemsTableTableManager(
+        _db,
+        _db.inventoryCountSessionItems,
+      );
 }

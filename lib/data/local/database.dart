@@ -4,6 +4,7 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'tables.dart';
 import 'daos/inventory_dao.dart';
 import 'daos/movements_dao.dart';
+import 'daos/count_session_dao.dart';
 
 part 'database.g.dart';
 
@@ -16,14 +17,16 @@ part 'database.g.dart';
     Products,
     Lots,
     Movements,
+    InventoryCountSessions,
+    InventoryCountSessionItems,
   ],
-  daos: [InventoryDao, MovementsDao],
+  daos: [InventoryDao, MovementsDao, CountSessionDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -32,6 +35,10 @@ class AppDatabase extends _$AppDatabase {
           if (from < 2) {
             await m.addColumn(products, products.tracksLots);
             await m.addColumn(products, products.directQuantity);
+          }
+          if (from < 3) {
+            await m.createTable(inventoryCountSessions);
+            await m.createTable(inventoryCountSessionItems);
           }
         },
       );

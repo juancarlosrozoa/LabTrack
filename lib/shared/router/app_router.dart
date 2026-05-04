@@ -10,6 +10,7 @@ import '../../features/inventory/screens/inventory_screen.dart';
 import '../../features/inventory/screens/product_detail_screen.dart';
 import '../../features/movements/screens/movements_screen.dart';
 import '../../features/movements/screens/register_movement_screen.dart';
+import '../../features/movements/screens/scan_count_screen.dart';
 import '../../features/weekly_count/screens/weekly_count_screen.dart';
 import '../../features/products/screens/products_screen.dart';
 import '../../features/products/screens/add_edit_product_screen.dart';
@@ -99,6 +100,15 @@ final routerProvider = Provider<GoRouter>((ref) {
                   path:    'exit',
                   builder: (_, _) =>
                       const RegisterMovementScreen(type: MovementType.exit),
+                ),
+                GoRoute(
+                  path:    'return',
+                  builder: (_, _) =>
+                      const RegisterMovementScreen(type: MovementType.returnItem),
+                ),
+                GoRoute(
+                  path:    'scan-count',
+                  builder: (_, _) => const ScanCountScreen(),
                 ),
               ],
             ),

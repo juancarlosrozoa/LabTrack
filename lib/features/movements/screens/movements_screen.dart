@@ -14,7 +14,16 @@ class MovementsScreen extends ConsumerWidget {
     final movementsAsync = ref.watch(movementsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Movements')),
+      appBar: AppBar(
+        title: const Text('Movements'),
+        actions: [
+          IconButton(
+            icon:    const Icon(Icons.qr_code_scanner_outlined),
+            tooltip: 'Scan & Count',
+            onPressed: () => context.push('/movements/scan-count'),
+          ),
+        ],
+      ),
       body: movementsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error:   (e, _) => Center(child: Text('Error: $e')),
@@ -155,23 +164,46 @@ class _ActionBar extends StatelessWidget {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Expanded(
-              child: _ActionButton(
-                label:     'Exit',
-                icon:      Icons.remove_circle_outline,
-                color:     AppTheme.danger,
-                onPressed: () => context.push('/movements/exit'),
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: _ActionButton(
+                    label:     'Exit',
+                    icon:      Icons.remove_circle_outline,
+                    color:     AppTheme.danger,
+                    onPressed: () => context.push('/movements/exit'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _ActionButton(
+                    label:     'Entry',
+                    icon:      Icons.add_circle_outline,
+                    color:     AppTheme.success,
+                    onPressed: () => context.push('/movements/entry'),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _ActionButton(
-                label:     'Entry',
-                icon:      Icons.add_circle_outline,
-                color:     AppTheme.success,
-                onPressed: () => context.push('/movements/entry'),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => context.push('/movements/return'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.secondary,
+                  side: BorderSide(color: AppTheme.secondary.withValues(alpha: 0.6)),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                icon:  const Icon(Icons.keyboard_return, size: 18),
+                label: const Text('Return',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
               ),
             ),
           ],

@@ -41,6 +41,17 @@ class MovementsDao extends DatabaseAccessor<AppDatabase>
         ),
       );
 
+  Future<List<Movement>> getExitMovementsByPeriod(
+          String labId, DateTime from, DateTime to) =>
+      (select(movements)
+            ..where((m) =>
+                m.labId.equals(labId) &
+                m.type.equals('exit') &
+                m.createdAt.isBiggerOrEqualValue(from) &
+                m.createdAt.isSmallerOrEqualValue(to))
+            ..orderBy([(m) => OrderingTerm.desc(m.createdAt)]))
+          .get();
+
   Future<void> upsertAllMovements(List<MovementsCompanion> rows) =>
       batch((b) => b.insertAllOnConflictUpdate(movements, rows));
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../data/local/database_provider.dart';
 import '../../../data/models/product_with_stock.dart';
 import '../../../data/remote/supabase_client.dart';
 import '../../../data/repositories/supabase_inventory_repository.dart';
@@ -143,6 +144,28 @@ class WeeklyCountNotifier extends AsyncNotifier<CountSession> {
           'quantity':   newQty,
           'updated_at': DateTime.now().toIso8601String(),
         }).eq('id', lot.id);
+      }
+
+      // Save count session history
+      final lab          = ref.read(selectedLabProvider);
+      final countedEntries = session.entries.where((e) => e.hasCount).toList();
+      if (lab != null && countedEntries.isNotEmpty) {
+        final db = ref.read(databaseProvider);
+        await db.countSessionDao.saveSession(
+          labId:            lab.labId,
+          countedAt:        session.startedAt ?? DateTime.now(),
+          totalCounted:     countedEntries.length,
+          discrepancyCount: session.discrepancies.length,
+          items: countedEntries
+              .map((e) => (
+                    productId:   e.item.product.id,
+                    productName: e.item.product.name,
+                    unit:        e.item.product.unit,
+                    expected:    e.expected,
+                    counted:     e.counted!,
+                  ))
+              .toList(),
+        );
       }
 
       // Sync remaining catalog/movements in background

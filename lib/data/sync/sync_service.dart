@@ -31,12 +31,14 @@ class SyncService {
     // Push first so Supabase triggers run before we pull updated data
     await _pushLocalProducts();
     await _pushUnsyncedMovements();
+    await _pushCountSessions();
 
     await Future.wait([
       _pullCatalog(),   // categories, locations, suppliers
       _pullProducts(),
       _pullLots(),
       _pullMovements(),
+      _pullCountSessions(),
     ]);
   }
 
@@ -164,6 +166,89 @@ class SyncService {
       }
     }
   }
+
+  // ── Count sessions ──────────────────────────────────────
+
+  Future<void> _pushCountSessions() async {
+    final sessions = await db.countSessionDao.getSessionsForLab(labId!);
+    if (sessions.isEmpty) return;
+
+    try {
+      await supabase.from('count_sessions').upsert(
+        sessions.map((s) => {
+          'id':                s.id,
+          'lab_id':            s.labId,
+          'counted_at':        s.countedAt.toIso8601String(),
+          'total_counted':     s.totalCounted,
+          'discrepancy_count': s.discrepancyCount,
+        }).toList(),
+      );
+
+      for (final s in sessions) {
+        final items = await db.countSessionDao.getItemsForSession(s.id);
+        if (items.isEmpty) continue;
+        await supabase.from('count_session_items').upsert(
+          items.map((i) => {
+            'id':           i.id,
+            'session_id':   i.sessionId,
+            'product_id':   i.productId,
+            'product_name': i.productName,
+            'unit':         i.unit,
+            'expected':     i.expected,
+            'counted':      i.counted,
+          }).toList(),
+        );
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _pullCountSessions() async {
+    final sessionRows = await supabase
+        .from('count_sessions')
+        .select()
+        .eq('lab_id', labId!)
+        .order('counted_at', ascending: false)
+        .limit(100) as List;
+
+    if (sessionRows.isEmpty) return;
+
+    await db.countSessionDao.batchUpsertSessions(
+      sessionRows.map(_rowToCountSession).toList(),
+    );
+
+    for (final row in sessionRows) {
+      final sessionId = row['id'] as String;
+      final itemRows  = await supabase
+          .from('count_session_items')
+          .select()
+          .eq('session_id', sessionId) as List;
+
+      if (itemRows.isEmpty) continue;
+      await db.countSessionDao.batchUpsertSessionItems(
+        itemRows.map(_rowToCountSessionItem).toList(),
+      );
+    }
+  }
+
+  InventoryCountSessionsCompanion _rowToCountSession(dynamic row) =>
+      InventoryCountSessionsCompanion(
+        id:               Value(row['id'] as String),
+        labId:            Value(row['lab_id'] as String),
+        countedAt:        Value(DateTime.parse(row['counted_at'] as String)),
+        totalCounted:     Value(row['total_counted'] as int),
+        discrepancyCount: Value(row['discrepancy_count'] as int),
+      );
+
+  InventoryCountSessionItemsCompanion _rowToCountSessionItem(dynamic row) =>
+      InventoryCountSessionItemsCompanion(
+        id:          Value(row['id'] as String),
+        sessionId:   Value(row['session_id'] as String),
+        productId:   Value(row['product_id'] as String),
+        productName: Value(row['product_name'] as String),
+        unit:        Value(row['unit'] as String),
+        expected:    Value((row['expected'] as num).toDouble()),
+        counted:     Value((row['counted'] as num).toDouble()),
+      );
 
   // ── Connectivity ────────────────────────────────────────
 

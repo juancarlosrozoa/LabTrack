@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/screens/barcode_scanner_screen.dart';
 import '../providers/weekly_count_providers.dart';
 
 class WeeklyCountScreen extends ConsumerWidget {
@@ -93,6 +94,11 @@ class _InProgressView extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Weekly Count'),
         actions: [
+          IconButton(
+            icon:    const Icon(Icons.qr_code_scanner_outlined),
+            tooltip: 'Scan barcode',
+            onPressed: () => _scanAndCount(context, ref, session),
+          ),
           TextButton(
             onPressed: () =>
                 ref.read(weeklyCountProvider.notifier).reset(),
@@ -154,6 +160,83 @@ class _InProgressView extends ConsumerWidget {
           : null,
     );
   }
+
+  Future<void> _scanAndCount(
+      BuildContext context, WidgetRef ref, CountSession session) async {
+    final code = await scanBarcode(context);
+    if (code == null || !context.mounted) return;
+
+    final entry = session.entries
+        .where((e) => e.item.product.barcode == code)
+        .firstOrNull;
+
+    if (entry == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No product found for barcode "$code"')),
+      );
+      return;
+    }
+
+    // Scroll to product is not needed — just open the count dialog
+    await _showCountDialog(context, ref, entry);
+  }
+
+  Future<void> _showCountDialog(
+      BuildContext context, WidgetRef ref, CountEntry entry) async {
+    final ctrl = TextEditingController(
+      text: entry.counted?.toString() ?? '',
+    );
+    final theme = Theme.of(context);
+
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(entry.item.product.name),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Expected: ${_fmtVal(entry.expected)} ${entry.item.product.unit}',
+              style: theme.textTheme.bodySmall
+                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller:   ctrl,
+              autofocus:    true,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                labelText:  'Counted quantity',
+                suffixText: entry.item.product.unit,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final val = double.tryParse(ctrl.text.trim());
+              if (val != null && val >= 0) {
+                ref
+                    .read(weeklyCountProvider.notifier)
+                    .recordCount(entry.item.product.id, val);
+              }
+              Navigator.pop(dialogContext);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _fmtVal(double v) =>
+      v == v.floorToDouble() ? v.toInt().toString() : v.toStringAsFixed(1);
 }
 
 class _CountEntryTile extends ConsumerWidget {

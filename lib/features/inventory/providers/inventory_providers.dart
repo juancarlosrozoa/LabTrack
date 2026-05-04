@@ -38,22 +38,35 @@ final inventoryProvider =
   }
 });
 
-// ── Search filter ─────────────────────────────────────────
+// ── Search + status filter ────────────────────────────────
 
 final inventorySearchProvider = StateProvider.autoDispose<String>((ref) => '');
 
+final inventoryStatusFilterProvider =
+    StateProvider.autoDispose<StockStatus?>((ref) => null);
+
 final filteredInventoryProvider =
     Provider.autoDispose<AsyncValue<List<ProductWithStock>>>((ref) {
-  final query    = ref.watch(inventorySearchProvider).toLowerCase().trim();
-  final async    = ref.watch(inventoryProvider);
+  final query  = ref.watch(inventorySearchProvider).toLowerCase().trim();
+  final status = ref.watch(inventoryStatusFilterProvider);
+  final async  = ref.watch(inventoryProvider);
 
   return async.whenData((items) {
-    if (query.isEmpty) return items;
-    return items
-        .where((p) =>
-            p.product.name.toLowerCase().contains(query) ||
-            (p.product.barcode?.toLowerCase().contains(query) ?? false))
-        .toList();
+    var result = items;
+
+    if (query.isNotEmpty) {
+      result = result
+          .where((p) =>
+              p.product.name.toLowerCase().contains(query) ||
+              (p.product.barcode?.toLowerCase().contains(query) ?? false))
+          .toList();
+    }
+
+    if (status != null) {
+      result = result.where((p) => p.stockStatus == status).toList();
+    }
+
+    return result;
   });
 });
 

@@ -153,26 +153,61 @@ class InventoryDao extends DatabaseAccessor<AppDatabase>
     return result;
   }
 
+  // ── Storage Conditions ─────────────────────────────────
+
+  Future<List<StorageCondition>> getStorageConditions(String labId) =>
+      (select(storageConditions)
+            ..where((s) => s.labId.equals(labId))
+            ..orderBy([(s) => OrderingTerm.asc(s.name)]))
+          .get();
+
+  Future<void> upsertStorageCondition(StorageConditionsCompanion row) =>
+      into(storageConditions).insertOnConflictUpdate(row);
+
+  Future<void> deleteStorageConditionById(String id) =>
+      (delete(storageConditions)..where((s) => s.id.equals(id))).go();
+
   // ── Categories ─────────────────────────────────────────
 
   Future<List<Category>> getCategories(String labId) =>
-      (select(categories)..where((c) => c.labId.equals(labId))).get();
+      (select(categories)
+            ..where((c) => c.labId.equals(labId))
+            ..orderBy([(c) => OrderingTerm.asc(c.name)]))
+          .get();
 
   Future<void> upsertAllCategories(List<CategoriesCompanion> rows) =>
       batch((b) => b.insertAllOnConflictUpdate(categories, rows));
 
+  Future<void> upsertCategory(CategoriesCompanion row) =>
+      into(categories).insertOnConflictUpdate(row);
+
+  Future<void> deleteCategoryById(String id) =>
+      (delete(categories)..where((c) => c.id.equals(id))).go();
+
   // ── Locations ──────────────────────────────────────────
 
   Future<List<Location>> getLocations(String labId) =>
-      (select(locations)..where((l) => l.labId.equals(labId))).get();
+      (select(locations)
+            ..where((l) => l.labId.equals(labId))
+            ..orderBy([(l) => OrderingTerm.asc(l.name)]))
+          .get();
 
   Future<void> upsertAllLocations(List<LocationsCompanion> rows) =>
       batch((b) => b.insertAllOnConflictUpdate(locations, rows));
 
+  Future<void> upsertLocation(LocationsCompanion row) =>
+      into(locations).insertOnConflictUpdate(row);
+
+  Future<void> deleteLocationById(String id) =>
+      (delete(locations)..where((l) => l.id.equals(id))).go();
+
   // ── Suppliers ──────────────────────────────────────────
 
   Future<List<Supplier>> getSuppliers(String labId) =>
-      (select(suppliers)..where((s) => s.labId.equals(labId))).get();
+      (select(suppliers)
+            ..where((s) => s.labId.equals(labId))
+            ..orderBy([(s) => OrderingTerm.asc(s.name)]))
+          .get();
 
   Future<void> upsertAllSuppliers(List<SuppliersCompanion> rows) =>
       batch((b) => b.insertAllOnConflictUpdate(suppliers, rows));
