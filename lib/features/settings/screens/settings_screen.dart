@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/lab_membership.dart';
 import '../../auth/providers/lab_provider.dart';
 import '../../help/screens/help_screen.dart';
+import '../../members/screens/members_screen.dart';
 import '../providers/settings_providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -27,6 +28,8 @@ class SettingsScreen extends ConsumerWidget {
           _StorageConditionsSection(),
           SizedBox(height: 24),
           _SuppliersSection(),
+          SizedBox(height: 24),
+          _MembersTile(),
           SizedBox(height: 24),
           _HelpTile(),
           SizedBox(height: 32),
@@ -823,7 +826,7 @@ class _Section extends StatelessWidget {
                 style: theme.textTheme.titleMedium
                     ?.copyWith(fontWeight: FontWeight.bold)),
             const Spacer(),
-            if (trailing != null) trailing!,
+            ?trailing,
           ],
         ),
         const SizedBox(height: 8),
@@ -837,6 +840,26 @@ class _Section extends StatelessWidget {
       ],
     );
   }
+}
+
+// ── Members tile ──────────────────────────────────────────
+
+class _MembersTile extends StatelessWidget {
+  const _MembersTile();
+
+  @override
+  Widget build(BuildContext context) => Card(
+        margin: EdgeInsets.zero,
+        child: ListTile(
+          leading:  const Icon(Icons.group_outlined),
+          title:    const Text('Team Members'),
+          subtitle: const Text('Manage roles and invitations'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const MembersScreen()),
+          ),
+        ),
+      );
 }
 
 // ── Help tile ─────────────────────────────────────────────
