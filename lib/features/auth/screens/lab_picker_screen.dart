@@ -16,10 +16,24 @@ class LabPickerScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showJoinDialog(context, ref),
-        icon:  const Icon(Icons.vpn_key_outlined),
-        label: const Text('Join with code'),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton.extended(
+            heroTag:   'join',
+            onPressed: () => _showJoinDialog(context, ref),
+            icon:      const Icon(Icons.vpn_key_outlined),
+            label:     const Text('Join with code'),
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton.extended(
+            heroTag:   'create',
+            onPressed: () => _showCreateLabDialog(context, ref),
+            icon:      const Icon(Icons.add),
+            label:     const Text('Create laboratory'),
+          ),
+        ],
       ),
       body: SafeArea(
         child: Padding(
@@ -32,13 +46,13 @@ class LabPickerScreen extends ConsumerWidget {
                   size: 40, color: theme.colorScheme.primary),
               const SizedBox(height: 16),
               Text(
-                'Select your laboratory',
+                'Your laboratories',
                 style: theme.textTheme.headlineSmall
                     ?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 6),
               Text(
-                'You have access to multiple laboratories.',
+                'Select one to continue, or create / join a new one.',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -56,7 +70,8 @@ class LabPickerScreen extends ConsumerWidget {
                   data: (labs) {
                     if (labs.isEmpty) {
                       return _NoLabsMessage(
-                        theme: theme,
+                        theme:          theme,
+                        onCreateLab:    () => _showCreateLabDialog(context, ref),
                         onJoinWithCode: () => _showJoinDialog(context, ref),
                       );
                     }
@@ -75,6 +90,17 @@ class LabPickerScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _showCreateLabDialog(BuildContext context, WidgetRef ref) async {
+    final membership = await showDialog<LabMembership>(
+      context: context,
+      builder: (_) => const _CreateLabDialog(),
+    );
+    if (membership != null && context.mounted) {
+      ref.read(selectedLabProvider.notifier).state = membership;
+      context.go('/dashboard');
+    }
   }
 
   Future<void> _showJoinDialog(BuildContext context, WidgetRef ref) async {
@@ -132,8 +158,13 @@ class _LabCard extends ConsumerWidget {
 
 class _NoLabsMessage extends StatelessWidget {
   final ThemeData    theme;
+  final VoidCallback onCreateLab;
   final VoidCallback onJoinWithCode;
-  const _NoLabsMessage({required this.theme, required this.onJoinWithCode});
+  const _NoLabsMessage({
+    required this.theme,
+    required this.onCreateLab,
+    required this.onJoinWithCode,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -158,8 +189,14 @@ class _NoLabsMessage extends StatelessWidget {
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           FilledButton.icon(
+            icon:      const Icon(Icons.add),
+            label:     const Text('Create laboratory'),
+            onPressed: onCreateLab,
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
             icon:      const Icon(Icons.vpn_key_outlined),
             label:     const Text('Join with code'),
             onPressed: onJoinWithCode,
@@ -167,6 +204,105 @@ class _NoLabsMessage extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+// ── Create laboratory dialog ──────────────────────────────
+
+class _CreateLabDialog extends ConsumerStatefulWidget {
+  const _CreateLabDialog();
+
+  @override
+  ConsumerState<_CreateLabDialog> createState() => _CreateLabDialogState();
+}
+
+class _CreateLabDialogState extends ConsumerState<_CreateLabDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _ctrl    = TextEditingController();
+  bool  _loading = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return AlertDialog(
+      title: const Text('Create laboratory'),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'You will be the administrator of this laboratory.',
+              style: theme.textTheme.bodySmall
+                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller:         _ctrl,
+              autofocus:          true,
+              textCapitalization: TextCapitalization.words,
+              textInputAction:    TextInputAction.done,
+              onFieldSubmitted:   (_) => _submit(),
+              decoration: InputDecoration(
+                labelText: 'Laboratory name',
+                hintText:  'e.g. Chemistry Lab A',
+                errorText: _error,
+              ),
+              validator: (v) {
+                if (v == null || v.trim().length < 2) {
+                  return 'Name must be at least 2 characters';
+                }
+                return null;
+              },
+              onChanged: (_) {
+                if (_error != null) setState(() => _error = null);
+              },
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _loading ? null : _submit,
+          child: _loading
+              ? const SizedBox(
+                  width: 16, height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2))
+              : const Text('Create'),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() { _loading = true; _error = null; });
+    try {
+      final membership = await ref
+          .read(createLabProvider.notifier)
+          .create(_ctrl.text);
+      ref.invalidate(userLabsProvider);
+      if (mounted) Navigator.pop(context, membership);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error   = e.toString().replaceFirst('Exception: ', '');
+      });
+    }
   }
 }
 

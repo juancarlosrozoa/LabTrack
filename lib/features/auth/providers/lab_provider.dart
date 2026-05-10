@@ -4,6 +4,37 @@ import '../../../data/models/lab_membership.dart';
 import '../../../data/remote/supabase_client.dart';
 import 'auth_provider.dart';
 
+// ── Create lab ────────────────────────────────────────────
+
+class CreateLabNotifier extends AsyncNotifier<void> {
+  @override
+  Future<void> build() async {}
+
+  Future<LabMembership> create(String name) async {
+    state = const AsyncLoading();
+    late LabMembership membership;
+    state = await AsyncValue.guard(() async {
+      final result = await supabase.rpc(
+        'create_laboratory',
+        params: {'p_name': name.trim()},
+      ) as Map<String, dynamic>;
+
+      if (result['error'] != null) throw Exception(result['error'] as String);
+
+      membership = LabMembership(
+        labId:   result['lab_id']   as String,
+        labName: result['lab_name'] as String,
+        labSlug: result['lab_slug'] as String,
+        role:    LabRoleX.fromString(result['role'] as String),
+      );
+    });
+    return membership;
+  }
+}
+
+final createLabProvider =
+    AsyncNotifierProvider<CreateLabNotifier, void>(CreateLabNotifier.new);
+
 // ── All labs the current user belongs to ──────────────────
 
 final userLabsProvider = FutureProvider<List<LabMembership>>((ref) async {
