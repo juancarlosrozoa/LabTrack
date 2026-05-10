@@ -12,10 +12,22 @@ final authStateChangesProvider = StreamProvider<sb.AuthState>((ref) {
   return supabase.auth.onAuthStateChange;
 });
 
+// ── Current auth event (tracked for password-recovery redirect) ───
+
+final authEventProvider = StateProvider<AuthChangeEvent?>((ref) => null);
+
+/// Keep-alive listener that pumps auth events into [authEventProvider].
+/// Watch this in the app root so it lives for the full app lifetime.
+final authEventListenerProvider = Provider<void>((ref) {
+  final sub = supabase.auth.onAuthStateChange.listen(
+    (data) => ref.read(authEventProvider.notifier).state = data.event,
+  );
+  ref.onDispose(sub.cancel);
+});
+
 // ── Current user (null = not logged in) ───────────────────
 
 final currentUserProvider = Provider<User?>((ref) {
-  // Listen to stream so provider invalidates on auth changes
   ref.watch(authStateChangesProvider);
   return supabase.auth.currentUser;
 });
@@ -49,6 +61,25 @@ class AuthNotifier extends AsyncNotifier<void> {
       needsConfirmation = res.session == null;
     });
     return needsConfirmation;
+  }
+
+  Future<void> sendPasswordReset(String email) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await supabase.auth.resetPasswordForEmail(
+        email.trim(),
+        redirectTo: 'io.supabase.labtrack://reset-callback',
+      );
+    });
+  }
+
+  Future<void> updatePassword(String newPassword) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await supabase.auth.updateUser(
+        UserAttributes(password: newPassword),
+      );
+    });
   }
 
   Future<void> signOut() async {

@@ -3,8 +3,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../data/remote/supabase_client.dart';
 import '../../features/auth/providers/lab_provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent;
+
+import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
+import '../../features/auth/screens/forgot_password_screen.dart';
+import '../../features/auth/screens/reset_password_screen.dart';
 import '../../features/auth/screens/lab_picker_screen.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/inventory/screens/inventory_screen.dart';
@@ -23,6 +28,9 @@ import 'go_router_refresh_stream.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final selectedLab = ref.watch(selectedLabProvider);
+  final authEvent   = ref.watch(authEventProvider);
+
+  const publicPages = {'/login', '/register', '/forgot-password'};
 
   final router = GoRouter(
     initialLocation: '/login',
@@ -30,18 +38,28 @@ final routerProvider = Provider<GoRouter>((ref) {
       supabase.auth.onAuthStateChange.cast<dynamic>(),
     ),
     redirect: (context, state) {
-      final isLoggedIn = supabase.auth.currentUser != null;
-      final location   = state.matchedLocation;
+      final isLoggedIn        = supabase.auth.currentUser != null;
+      final location          = state.matchedLocation;
+      final isResettingPwd    = authEvent == AuthChangeEvent.passwordRecovery;
 
-      if (!isLoggedIn) {
-        return location == '/login' ? null : '/login';
+      // Password recovery takes priority — show reset screen
+      if (isResettingPwd && location != '/reset-password') {
+        return '/reset-password';
       }
 
-      if (location == '/login') {
+      // Block access to app when not logged in (except public pages)
+      if (!isLoggedIn && !publicPages.contains(location)) {
+        return '/login';
+      }
+
+      // Already logged in → skip login/register pages
+      if (isLoggedIn && publicPages.contains(location)) {
         return selectedLab == null ? '/lab-picker' : '/dashboard';
       }
 
-      if (selectedLab == null && location != '/lab-picker') {
+      // Logged in, no lab selected, not resetting password
+      if (isLoggedIn && !isResettingPwd &&
+          selectedLab == null && location != '/lab-picker') {
         return '/lab-picker';
       }
 
@@ -56,6 +74,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path:    '/register',
         builder: (_, _) => const RegisterScreen(),
+      ),
+      GoRoute(
+        path:    '/forgot-password',
+        builder: (_, _) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path:    '/reset-password',
+        builder: (_, _) => const ResetPasswordScreen(),
       ),
       GoRoute(
         path:    '/lab-picker',
