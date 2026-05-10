@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../providers/auth_provider.dart';
 
@@ -166,6 +167,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             )
                           : const Text('Sign In',
                               style: TextStyle(fontSize: 16)),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // ── Create account link ───────────────
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Don't have an account?",
+                          style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant),
+                        ),
+                        TextButton(
+                          onPressed: () => context.push('/register'),
+                          child: const Text('Create account'),
+                        ),
+                      ],
                     ),
                   ],
                 ),

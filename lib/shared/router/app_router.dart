@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../data/remote/supabase_client.dart';
 import '../../features/auth/providers/lab_provider.dart';
 import '../../features/auth/screens/login_screen.dart';
+import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/screens/lab_picker_screen.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/inventory/screens/inventory_screen.dart';
@@ -53,13 +54,17 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, _) => const LoginScreen(),
       ),
       GoRoute(
+        path:    '/register',
+        builder: (_, _) => const RegisterScreen(),
+      ),
+      GoRoute(
         path:    '/lab-picker',
         builder: (_, _) => const LabPickerScreen(),
       ),
 
       // ── Main app shell with bottom nav ──────────
       StatefulShellRoute.indexedStack(
-        builder: (_, __, shell) => AppShell(navigationShell: shell),
+        builder: (_, _, shell) => AppShell(navigationShell: shell),
         branches: [
           // Dashboard
           StatefulShellBranch(routes: [

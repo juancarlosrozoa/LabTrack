@@ -36,6 +36,21 @@ class AuthNotifier extends AsyncNotifier<void> {
     });
   }
 
+  /// Returns true if email confirmation is required (session not created yet).
+  Future<bool> signUp(String email, String password, String displayName) async {
+    state = const AsyncLoading();
+    bool needsConfirmation = false;
+    state = await AsyncValue.guard(() async {
+      final res = await supabase.auth.signUp(
+        email:    email.trim(),
+        password: password,
+        data:     {'full_name': displayName.trim()},
+      );
+      needsConfirmation = res.session == null;
+    });
+    return needsConfirmation;
+  }
+
   Future<void> signOut() async {
     await supabase.auth.signOut();
   }
