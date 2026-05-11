@@ -5,6 +5,7 @@ import '../../../data/models/lab_membership.dart';
 import '../../auth/providers/lab_provider.dart';
 import '../../help/screens/help_screen.dart';
 import '../../members/screens/members_screen.dart';
+import '../../profile/providers/profile_provider.dart';
 import '../providers/settings_providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -17,6 +18,8 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          _ProfileSection(),
+          SizedBox(height: 24),
           _LabSection(),
           SizedBox(height: 24),
           _AlertConfigSection(),
@@ -33,6 +36,99 @@ class SettingsScreen extends ConsumerWidget {
           SizedBox(height: 24),
           _HelpTile(),
           SizedBox(height: 32),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Profile section ───────────────────────────────────────
+
+class _ProfileSection extends ConsumerWidget {
+  const _ProfileSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profileAsync = ref.watch(currentProfileProvider);
+    final theme        = Theme.of(context);
+
+    return _Section(
+      title: 'My Profile',
+      trailing: IconButton(
+        icon:    const Icon(Icons.edit_outlined),
+        tooltip: 'Edit profile',
+        onPressed: () => profileAsync.valueOrNull == null
+            ? null
+            : _showEditDialog(context, ref, profileAsync.value!),
+      ),
+      child: profileAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error:   (e, _) => Text('Error: $e'),
+        data: (profile) {
+          if (profile == null) return const SizedBox.shrink();
+          final initial = profile.displayName.isNotEmpty
+              ? profile.displayName[0].toUpperCase()
+              : '?';
+          return ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: CircleAvatar(
+              backgroundColor: theme.colorScheme.primaryContainer,
+              child: Text(
+                initial,
+                style: TextStyle(
+                  color:      theme.colorScheme.onPrimaryContainer,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            title: Text(
+              profile.displayName.isNotEmpty ? profile.displayName : '—',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text(profile.email,
+                style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant)),
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _showEditDialog(
+      BuildContext context, WidgetRef ref, UserProfile profile) async {
+    final ctrl    = TextEditingController(text: profile.displayName);
+    final formKey = GlobalKey<FormState>();
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Edit profile'),
+        content: Form(
+          key: formKey,
+          child: TextFormField(
+            controller:         ctrl,
+            autofocus:          true,
+            textCapitalization: TextCapitalization.words,
+            decoration: const InputDecoration(labelText: 'Display name'),
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Required' : null,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              if (!formKey.currentState!.validate()) return;
+              Navigator.pop(ctx);
+              await ref
+                  .read(profileNotifierProvider.notifier)
+                  .updateDisplayName(ctrl.text);
+            },
+            child: const Text('Save'),
+          ),
         ],
       ),
     );
