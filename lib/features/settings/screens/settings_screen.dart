@@ -142,11 +142,22 @@ class _LabSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final lab   = ref.watch(selectedLabProvider);
-    final theme = Theme.of(context);
+    final lab     = ref.watch(selectedLabProvider);
+    final role    = ref.watch(currentLabRoleProvider);
+    final isAdmin = role?.isAdmin ?? false;
+    final theme   = Theme.of(context);
 
     return _Section(
       title: 'Laboratory',
+      trailing: isAdmin
+          ? IconButton(
+              icon:    const Icon(Icons.edit_outlined),
+              tooltip: 'Rename laboratory',
+              onPressed: () => lab == null
+                  ? null
+                  : _showRenameDialog(context, ref, lab),
+            )
+          : null,
       child: Column(
         children: [
           ListTile(
@@ -173,6 +184,46 @@ class _LabSection extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () =>
                 ref.read(selectedLabProvider.notifier).state = null,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showRenameDialog(
+      BuildContext context, WidgetRef ref, LabMembership lab) async {
+    final ctrl    = TextEditingController(text: lab.labName);
+    final formKey = GlobalKey<FormState>();
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Rename laboratory'),
+        content: Form(
+          key: formKey,
+          child: TextFormField(
+            controller:         ctrl,
+            autofocus:          true,
+            textCapitalization: TextCapitalization.words,
+            decoration: const InputDecoration(labelText: 'Laboratory name'),
+            validator: (v) =>
+                (v == null || v.trim().length < 2) ? 'At least 2 characters' : null,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              if (!formKey.currentState!.validate()) return;
+              Navigator.pop(ctx);
+              await ref
+                  .read(renameLabProvider.notifier)
+                  .rename(lab.labId, ctrl.text);
+            },
+            child: const Text('Save'),
           ),
         ],
       ),

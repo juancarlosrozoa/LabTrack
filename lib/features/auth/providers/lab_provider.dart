@@ -4,6 +4,38 @@ import '../../../data/models/lab_membership.dart';
 import '../../../data/remote/supabase_client.dart';
 import 'auth_provider.dart';
 
+// ── Rename lab ────────────────────────────────────────────
+
+class RenameLabNotifier extends AsyncNotifier<void> {
+  @override
+  Future<void> build() async {}
+
+  Future<void> rename(String labId, String newName) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await supabase
+          .from('laboratories')
+          .update({'name': newName.trim()})
+          .eq('id', labId);
+
+      // Keep selectedLabProvider in sync
+      final current = ref.read(selectedLabProvider);
+      if (current != null && current.labId == labId) {
+        ref.read(selectedLabProvider.notifier).state = LabMembership(
+          labId:   current.labId,
+          labName: newName.trim(),
+          labSlug: current.labSlug,
+          role:    current.role,
+        );
+      }
+      ref.invalidate(userLabsProvider);
+    });
+  }
+}
+
+final renameLabProvider =
+    AsyncNotifierProvider<RenameLabNotifier, void>(RenameLabNotifier.new);
+
 // ── Create lab ────────────────────────────────────────────
 
 class CreateLabNotifier extends AsyncNotifier<void> {
