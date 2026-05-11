@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../auth/providers/lab_provider.dart';
 import '../providers/inventory_trend_providers.dart';
+import '../services/csv_export_service.dart';
 
 class InventoryTrendScreen extends ConsumerWidget {
   const InventoryTrendScreen({super.key});
@@ -13,7 +15,20 @@ class InventoryTrendScreen extends ConsumerWidget {
     final trendAsync = ref.watch(inventoryTrendProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Inventory Trend')),
+      appBar: AppBar(
+        title: const Text('Inventory Trend'),
+        actions: [
+          if (trendAsync.valueOrNull?.isEmpty == false)
+            IconButton(
+              icon:    const Icon(Icons.download_outlined),
+              tooltip: 'Export CSV',
+              onPressed: () => CsvExportService.exportInventoryTrend(
+                trendAsync.value!,
+                ref.read(selectedLabProvider)?.labName ?? 'Lab',
+              ),
+            ),
+        ],
+      ),
       body: trendAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error:   (e, _) => Center(child: Text('Error: $e')),

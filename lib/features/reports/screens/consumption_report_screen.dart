@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../auth/providers/lab_provider.dart';
 import '../providers/consumption_providers.dart';
+import '../services/csv_export_service.dart';
 
 class ConsumptionReportScreen extends ConsumerWidget {
   const ConsumptionReportScreen({super.key});
@@ -13,7 +15,21 @@ class ConsumptionReportScreen extends ConsumerWidget {
     final dataAsync = ref.watch(consumptionReportProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Consumption')),
+      appBar: AppBar(
+        title: const Text('Consumption'),
+        actions: [
+          if (dataAsync.valueOrNull?.isNotEmpty == true)
+            IconButton(
+              icon:    const Icon(Icons.download_outlined),
+              tooltip: 'Export CSV',
+              onPressed: () => CsvExportService.exportConsumption(
+                dataAsync.value!,
+                period.label,
+                ref.read(selectedLabProvider)?.labName ?? 'Lab',
+              ),
+            ),
+        ],
+      ),
       body: Column(
         children: [
           // ── Period chips ──────────────────────────────

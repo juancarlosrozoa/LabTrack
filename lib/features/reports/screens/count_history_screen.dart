@@ -4,7 +4,9 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../data/local/database.dart';
+import '../../auth/providers/lab_provider.dart';
 import '../providers/count_history_providers.dart';
+import '../services/csv_export_service.dart';
 
 class CountHistoryScreen extends ConsumerWidget {
   const CountHistoryScreen({super.key});
@@ -14,7 +16,28 @@ class CountHistoryScreen extends ConsumerWidget {
     final sessionsAsync = ref.watch(countHistoryProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Count History')),
+      appBar: AppBar(
+        title: const Text('Count History'),
+        actions: [
+          if (sessionsAsync.valueOrNull?.isNotEmpty == true)
+            IconButton(
+              icon:    const Icon(Icons.download_outlined),
+              tooltip: 'Export CSV',
+              onPressed: () async {
+                final sessions = sessionsAsync.value!;
+                final labName  = ref.read(selectedLabProvider)?.labName ?? 'Lab';
+                final items    = <String, List<InventoryCountSessionItem>>{};
+                for (final s in sessions) {
+                  items[s.id] = await ref.read(
+                    countSessionItemsProvider(s.id).future,
+                  );
+                }
+                await CsvExportService.exportCountHistory(
+                    sessions, items, labName);
+              },
+            ),
+        ],
+      ),
       body: sessionsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error:   (e, _) => Center(child: Text('Error: $e')),
