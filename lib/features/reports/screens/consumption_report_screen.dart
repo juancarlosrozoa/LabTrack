@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_error_widget.dart';
 import '../../auth/providers/lab_provider.dart';
 import '../providers/consumption_providers.dart';
 import '../services/csv_export_service.dart';
@@ -58,7 +59,7 @@ class ConsumptionReportScreen extends ConsumerWidget {
             child: dataAsync.when(
               loading: () =>
                   const Center(child: CircularProgressIndicator()),
-              error:   (e, _) => Center(child: Text('Error: $e')),
+              error:   (e, _) => AppErrorWidget(error: e),
               data:    (items) => items.isEmpty
                   ? const _EmptyState()
                   : _ConsumptionList(items: items),

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_error_widget.dart';
 import '../../../data/models/product_with_stock.dart';
 import '../providers/reports_providers.dart';
 import '../providers/sheets_sync_provider.dart';
@@ -24,7 +25,7 @@ class ReportsScreen extends ConsumerWidget {
       ),
       error: (e, _) => Scaffold(
         appBar: AppBar(title: const Text('Reports')),
-        body: Center(child: Text('Error: $e')),
+        body: AppErrorWidget(error: e),
       ),
       data: (report) => _ReportView(report: report),
     );

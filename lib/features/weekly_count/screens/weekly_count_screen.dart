@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_error_widget.dart';
 import '../../../shared/screens/barcode_scanner_screen.dart';
 import '../providers/weekly_count_providers.dart';
 
@@ -17,7 +18,7 @@ class WeeklyCountScreen extends ConsumerWidget {
       ),
       error: (e, _) => Scaffold(
         appBar: AppBar(title: const Text('Weekly Count')),
-        body: Center(child: Text('Error: $e')),
+        body: AppErrorWidget(error: e),
       ),
       data: (session) => switch (session.status) {
         CountSessionStatus.idle       => const _IdleView(),

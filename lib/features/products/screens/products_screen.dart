@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_error_widget.dart';
 import '../../inventory/providers/inventory_providers.dart';
 
 class ProductsScreen extends ConsumerWidget {
@@ -25,7 +26,7 @@ class ProductsScreen extends ConsumerWidget {
       ),
       body: inventoryAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error:   (e, _) => Center(child: Text('Error: $e')),
+        error:   (e, _) => AppErrorWidget(error: e),
         data:    (items) {
           if (items.isEmpty) return const _EmptyState();
           return _ProductList(items: items);

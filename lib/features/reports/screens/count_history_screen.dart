@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_error_widget.dart';
 import '../../../data/local/database.dart';
 import '../../auth/providers/lab_provider.dart';
 import '../providers/count_history_providers.dart';
@@ -40,7 +41,7 @@ class CountHistoryScreen extends ConsumerWidget {
       ),
       body: sessionsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error:   (e, _) => Center(child: Text('Error: $e')),
+        error:   (e, _) => AppErrorWidget(error: e),
         data: (sessions) => sessions.isEmpty
             ? const _EmptyState()
             : ListView.builder(
@@ -130,7 +131,7 @@ class _SessionDetail extends ConsumerWidget {
       ),
       error: (e, _) => Padding(
         padding: const EdgeInsets.all(16),
-        child: Text('Error: $e'),
+        child: AppErrorWidget(error: e),
       ),
       data: (items) => Column(
         children: [

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_error_widget.dart';
 import '../../auth/providers/lab_provider.dart';
 import '../providers/inventory_trend_providers.dart';
 import '../services/csv_export_service.dart';
@@ -31,7 +32,7 @@ class InventoryTrendScreen extends ConsumerWidget {
       ),
       body: trendAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error:   (e, _) => Center(child: Text('Error: $e')),
+        error:   (e, _) => AppErrorWidget(error: e),
         data:    (data) =>
             data == null || data.isEmpty
                 ? const _EmptyState()

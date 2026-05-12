@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_error_widget.dart';
 import '../providers/movements_providers.dart';
 
 class MovementsScreen extends ConsumerWidget {
@@ -26,7 +27,7 @@ class MovementsScreen extends ConsumerWidget {
       ),
       body: movementsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error:   (e, _) => Center(child: Text('Error: $e')),
+        error:   (e, _) => AppErrorWidget(error: e),
         data:    (movements) => movements.isEmpty
             ? const _EmptyState()
             : _MovementsList(items: movements),

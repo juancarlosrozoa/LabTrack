@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_error_widget.dart';
 import '../../../data/models/lot.dart';
 import '../../../data/models/product_with_stock.dart';
 import '../../../shared/widgets/expiry_badge.dart';
@@ -26,7 +27,7 @@ class ProductDetailScreen extends ConsumerWidget {
       ),
       error: (e, _) => Scaffold(
         appBar: AppBar(),
-        body: Center(child: Text('Error: $e')),
+        body: AppErrorWidget(error: e),
       ),
       data: (item) {
         if (item == null) {

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../core/widgets/app_error_widget.dart';
 import '../../../data/models/lab_membership.dart';
 import '../../auth/providers/lab_provider.dart';
 import '../providers/members_providers.dart';
@@ -31,7 +32,7 @@ class MembersScreen extends ConsumerWidget {
       ),
       body: membersAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error:   (e, _) => Center(child: Text('Error: $e')),
+        error:   (e, _) => AppErrorWidget(error: e),
         data:    (members) => ListView(
           padding: const EdgeInsets.symmetric(vertical: 8),
           children: [
@@ -278,7 +279,7 @@ class _MemberActionsSheetState
   }
 
   Future<void> _showTransferAdminDialog(BuildContext context) async {
-    LabRole myNewRole = LabRole.editor;
+    LabRole myNewRole = LabRole.manager;
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -299,8 +300,8 @@ class _MemberActionsSheetState
               DropdownButtonFormField<LabRole>(
                 initialValue: myNewRole,
                 decoration:  const InputDecoration(isDense: true),
-                items: [LabRole.editor, LabRole.viewer]
-                    .map((r) => DropdownMenuItem(
+                items: [LabRole.manager, LabRole.analyst, LabRole.viewer]
+                    .map<DropdownMenuItem<LabRole>>((r) => DropdownMenuItem(
                           value: r,
                           child: Text(r.label),
                         ))
@@ -542,7 +543,7 @@ class _InviteDialogState extends ConsumerState<_InviteDialog> {
       setState(() => _loading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(AppErrorWidget.friendlyMessage(e))),
         );
       }
     }

@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../../../data/local/database.dart';
 import '../../../data/local/database_provider.dart';
 import '../../../data/remote/supabase_client.dart';
+import '../../../services/notification_service.dart';
 import '../../auth/providers/lab_provider.dart';
 
 // ── Alert Config ──────────────────────────────────────────
@@ -399,6 +400,29 @@ class LocationsNotifier
   Future<List<LocationItem>> _reload(String labId) async {
     final rows = await _db.inventoryDao.getLocations(labId);
     return rows.map((r) => LocationItem(id: r.id, name: r.name)).toList();
+  }
+}
+
+// ── Push notifications toggle ─────────────────────────────
+
+final notificationsEnabledProvider =
+    AsyncNotifierProvider<NotificationsEnabledNotifier, bool>(
+        NotificationsEnabledNotifier.new);
+
+class NotificationsEnabledNotifier extends AsyncNotifier<bool> {
+  @override
+  Future<bool> build() => NotificationService.isEnabled();
+
+  Future<void> toggle(bool enabled) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      if (enabled) {
+        await NotificationService.init();
+      } else {
+        await NotificationService.disable();
+      }
+      return NotificationService.isEnabled();
+    });
   }
 }
 

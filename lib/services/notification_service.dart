@@ -82,6 +82,29 @@ class NotificationService {
     _fcm.onTokenRefresh.listen(_upsertToken);
   }
 
+  static Future<bool> isEnabled() async {
+    if (kIsWeb) return false;
+    if (defaultTargetPlatform != TargetPlatform.android &&
+        defaultTargetPlatform != TargetPlatform.iOS) {
+      return false;
+    }
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) return false;
+    final data = await supabase
+        .from('fcm_tokens')
+        .select('token')
+        .eq('user_id', userId)
+        .maybeSingle();
+    return data != null;
+  }
+
+  static Future<void> disable() async {
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) return;
+    await _fcm.deleteToken();
+    await supabase.from('fcm_tokens').delete().eq('user_id', userId);
+  }
+
   static Future<void> _saveToken() async {
     final token = await _fcm.getToken();
     if (token != null) await _upsertToken(token);

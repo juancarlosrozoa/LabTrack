@@ -6,6 +6,7 @@ import '../../../data/models/movement.dart';
 import '../../../data/models/product_with_stock.dart';
 import '../../../shared/screens/barcode_scanner_screen.dart';
 import '../../../shared/widgets/expiry_badge.dart';
+import '../../../core/widgets/app_error_widget.dart';
 import '../../inventory/providers/inventory_providers.dart';
 import '../providers/movements_providers.dart';
 
@@ -125,7 +126,7 @@ class _RegisterMovementScreenState
       appBar: AppBar(title: Text(title)),
       body: inventoryAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error:   (e, _) => Center(child: Text('Error: $e')),
+        error:   (e, _) => AppErrorWidget(error: e),
         data:    (items) => _buildForm(context, items, isLoading),
       ),
     );

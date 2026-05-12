@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/widgets/app_error_widget.dart';
 import '../../../data/models/lab_membership.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../auth/providers/lab_provider.dart';
@@ -66,7 +67,7 @@ class _ProfileSection extends ConsumerWidget {
       ),
       child: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error:   (e, _) => Text('Error: $e'),
+        error:   (e, _) => AppErrorWidget(error: e),
         data: (profile) {
           if (profile == null) return const SizedBox.shrink();
           final initial = profile.displayName.isNotEmpty
@@ -253,16 +254,32 @@ class _AlertConfigSectionState extends ConsumerState<_AlertConfigSection> {
 
     return async.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error:   (e, _) => Text('Error: $e'),
+      error:   (e, _) => AppErrorWidget(error: e),
       data: (config) {
         _draft ??= config;
         final draft = _draft!;
+        final pushAsync = ref.watch(notificationsEnabledProvider);
 
         return _Section(
           title: 'Alert Notifications',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Push notifications master toggle
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title:    const Text('Push notifications'),
+                subtitle: const Text('Receive alerts on this device'),
+                value:    pushAsync.valueOrNull ?? false,
+                onChanged: pushAsync.isLoading
+                    ? null
+                    : (v) => ref
+                        .read(notificationsEnabledProvider.notifier)
+                        .toggle(v),
+              ),
+              const Divider(height: 8),
+              const SizedBox(height: 8),
+
               // Expiry alert days chips
               const Text('Notify before expiry:',
                   style: TextStyle(fontSize: 13, color: Colors.grey)),
@@ -360,7 +377,7 @@ class _SimpleNameSection extends StatelessWidget {
       ),
       child: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error:   (e, _) => Text('Error: $e'),
+        error:   (e, _) => AppErrorWidget(error: e),
         data: (items) => items.isEmpty
             ? Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -603,7 +620,7 @@ class _StorageConditionsSection extends ConsumerWidget {
       ),
       child: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error:   (e, _) => Text('Error: $e'),
+        error:   (e, _) => AppErrorWidget(error: e),
         data: (conditions) => conditions.isEmpty
             ? const Padding(
                 padding: EdgeInsets.symmetric(vertical: 16),
@@ -813,7 +830,7 @@ class _SuppliersSection extends ConsumerWidget {
       ),
       child: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error:   (e, _) => Text('Error: $e'),
+        error:   (e, _) => AppErrorWidget(error: e),
         data: (suppliers) => suppliers.isEmpty
             ? const Padding(
                 padding: EdgeInsets.symmetric(vertical: 16),
