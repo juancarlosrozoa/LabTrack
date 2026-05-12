@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/models/lab_membership.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../../auth/providers/lab_provider.dart';
 import '../../help/screens/help_screen.dart';
 import '../../members/screens/members_screen.dart';
@@ -35,6 +36,8 @@ class SettingsScreen extends ConsumerWidget {
           _MembersTile(),
           SizedBox(height: 24),
           _HelpTile(),
+          SizedBox(height: 24),
+          _DangerZoneSection(),
           SizedBox(height: 32),
         ],
       ),
@@ -1027,4 +1030,105 @@ class _HelpTile extends StatelessWidget {
           ),
         ),
       );
+}
+
+// ── Danger zone ───────────────────────────────────────────
+
+class _DangerZoneSection extends ConsumerWidget {
+  const _DangerZoneSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Danger Zone',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color:      theme.colorScheme.error,
+              ),
+            ),
+            const Spacer(),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Card(
+          margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: theme.colorScheme.error.withValues(alpha: 0.4)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Delete Account',
+                  style: theme.textTheme.bodyMedium
+                      ?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Permanently deletes your account and removes you from all laboratories. This cannot be undone.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: theme.colorScheme.error,
+                      side: BorderSide(
+                          color: theme.colorScheme.error.withValues(alpha: 0.6)),
+                    ),
+                    onPressed: () => _confirmDelete(context, ref),
+                    child: const Text('Delete my account'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete account?'),
+        content: const Text(
+          'This will permanently delete your account and all your data. '
+          'You cannot be the sole admin of any laboratory.\n\n'
+          'This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(ctx).colorScheme.error),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      final notifier = ref.read(authNotifierProvider.notifier);
+      await notifier.deleteAccount();
+      // Router will redirect to login once auth state changes
+    }
+  }
 }

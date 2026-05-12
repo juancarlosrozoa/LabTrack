@@ -174,7 +174,10 @@ class _MemberActionsSheetState
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme          = Theme.of(context);
+    final currentRole    = ref.watch(currentLabRoleProvider);
+    final isCurrentAdmin = currentRole?.isAdmin ?? false;
+    final targetIsAdmin  = widget.member.role == LabRole.admin;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
@@ -221,6 +224,19 @@ class _MemberActionsSheetState
               child: const Text('Save role'),
             ),
           ),
+
+          // Transfer admin (visible only to admin, only for non-admin members)
+          if (isCurrentAdmin && !targetIsAdmin) ...[
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                icon:  const Icon(Icons.admin_panel_settings_outlined, size: 18),
+                label: const Text('Transfer admin'),
+                onPressed: () => _showTransferAdminDialog(context),
+              ),
+            ),
+          ],
           const SizedBox(height: 8),
 
           // Remove member
@@ -259,6 +275,62 @@ class _MemberActionsSheetState
         ],
       ),
     );
+  }
+
+  Future<void> _showTransferAdminDialog(BuildContext context) async {
+    LabRole myNewRole = LabRole.editor;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (_, setDialogState) => AlertDialog(
+          title: const Text('Transfer admin'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${widget.member.displayName} will become the new admin.',
+              ),
+              const SizedBox(height: 16),
+              const Text('Your new role:',
+                  style: TextStyle(fontSize: 13, color: Colors.grey)),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<LabRole>(
+                initialValue: myNewRole,
+                decoration:  const InputDecoration(isDense: true),
+                items: [LabRole.editor, LabRole.viewer]
+                    .map((r) => DropdownMenuItem(
+                          value: r,
+                          child: Text(r.label),
+                        ))
+                    .toList(),
+                onChanged: (r) {
+                  if (r != null) setDialogState(() => myNewRole = r);
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Transfer'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      await ref
+          .read(membersNotifierProvider.notifier)
+          .transferAdmin(widget.member.userId, myNewRole);
+      if (context.mounted) Navigator.pop(context);
+    }
   }
 }
 

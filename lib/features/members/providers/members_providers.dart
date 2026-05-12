@@ -140,6 +140,20 @@ class MembersNotifier extends AsyncNotifier<void> {
       ref.invalidate(labMembersProvider);
     });
   }
+
+  Future<void> transferAdmin(String targetUserId, LabRole myNewRole) async {
+    final lab = ref.read(selectedLabProvider);
+    if (lab == null) return;
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await supabase.rpc('transfer_admin', params: {
+        'p_lab_id':      lab.labId,
+        'p_user_id':     targetUserId,
+        'p_my_new_role': myNewRole.name,
+      });
+      ref.invalidate(labMembersProvider);
+    });
+  }
 }
 
 final membersNotifierProvider =

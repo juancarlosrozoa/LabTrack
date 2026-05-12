@@ -82,6 +82,14 @@ class AuthNotifier extends AsyncNotifier<void> {
     });
   }
 
+  Future<void> deleteAccount() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await supabase.rpc('delete_own_account');
+      await supabase.auth.signOut();
+    });
+  }
+
   Future<void> signOut() async {
     await supabase.auth.signOut();
   }
