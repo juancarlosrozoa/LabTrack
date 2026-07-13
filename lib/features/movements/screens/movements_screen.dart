@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_error_widget.dart';
+import '../../../data/models/lab_membership.dart';
+import '../../auth/providers/lab_provider.dart';
 import '../providers/movements_providers.dart';
 
 class MovementsScreen extends ConsumerWidget {
@@ -13,16 +15,18 @@ class MovementsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final movementsAsync = ref.watch(movementsProvider);
+    final canWrite        = ref.watch(currentLabRoleProvider)?.canWrite ?? false;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Movements'),
         actions: [
-          IconButton(
-            icon:    const Icon(Icons.qr_code_scanner_outlined),
-            tooltip: 'Scan & Count',
-            onPressed: () => context.push('/movements/scan-count'),
-          ),
+          if (canWrite)
+            IconButton(
+              icon:    const Icon(Icons.qr_code_scanner_outlined),
+              tooltip: 'Scan & Count',
+              onPressed: () => context.push('/movements/scan-count'),
+            ),
         ],
       ),
       body: movementsAsync.when(
@@ -32,7 +36,7 @@ class MovementsScreen extends ConsumerWidget {
             ? const _EmptyState()
             : _MovementsList(items: movements),
       ),
-      bottomNavigationBar: _ActionBar(),
+      bottomNavigationBar: canWrite ? _ActionBar() : null,
     );
   }
 }

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_error_widget.dart';
+import '../../../data/models/lab_membership.dart';
 import '../../../shared/screens/barcode_scanner_screen.dart';
+import '../../auth/providers/lab_provider.dart';
 import '../providers/weekly_count_providers.dart';
 
 class WeeklyCountScreen extends ConsumerWidget {
@@ -37,7 +39,8 @@ class _IdleView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+    final theme    = Theme.of(context);
+    final canWrite = ref.watch(currentLabRoleProvider)?.canWrite ?? false;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Weekly Count')),
@@ -63,16 +66,24 @@ class _IdleView extends ConsumerWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 40),
-              FilledButton.icon(
-                onPressed: () =>
-                    ref.read(weeklyCountProvider.notifier).startSession(),
-                icon:  const Icon(Icons.play_arrow),
-                label: const Text('Start count session'),
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 32, vertical: 16),
+              if (canWrite)
+                FilledButton.icon(
+                  onPressed: () =>
+                      ref.read(weeklyCountProvider.notifier).startSession(),
+                  icon:  const Icon(Icons.play_arrow),
+                  label: const Text('Start count session'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 16),
+                  ),
+                )
+              else
+                Text(
+                  'You do not have permission to start a count session.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant),
+                  textAlign: TextAlign.center,
                 ),
-              ),
             ],
           ),
         ),

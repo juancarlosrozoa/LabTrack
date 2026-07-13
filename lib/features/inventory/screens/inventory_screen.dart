@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../data/models/lab_membership.dart';
 import '../../../data/models/product_with_stock.dart';
 import '../../../shared/screens/barcode_scanner_screen.dart';
 import '../../../shared/widgets/product_card.dart';
+import '../../auth/providers/lab_provider.dart';
 import '../providers/inventory_providers.dart';
 
 class InventoryScreen extends ConsumerStatefulWidget {
@@ -35,6 +37,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   Widget build(BuildContext context) {
     final inventoryAsync = ref.watch(filteredInventoryProvider);
     final searchQuery    = ref.watch(inventorySearchProvider);
+    final canManage      = ref.watch(currentLabRoleProvider)?.canManage ?? false;
 
     return Scaffold(
       appBar: AppBar(
@@ -95,11 +98,13 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed:  () => context.push('/products/add'),
-        icon:       const Icon(Icons.add),
-        label:      const Text('Add product'),
-      ),
+      floatingActionButton: canManage
+          ? FloatingActionButton.extended(
+              onPressed:  () => context.push('/products/add'),
+              icon:       const Icon(Icons.add),
+              label:      const Text('Add product'),
+            )
+          : null,
     );
   }
 }

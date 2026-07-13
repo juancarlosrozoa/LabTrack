@@ -7,10 +7,12 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_error_widget.dart';
+import '../../../data/models/lab_membership.dart';
 import '../../../data/models/lot.dart';
 import '../../../data/models/product_with_stock.dart';
 import '../../../shared/widgets/expiry_badge.dart';
 import '../../../shared/widgets/stock_status_badge.dart' as badge;
+import '../../auth/providers/lab_provider.dart';
 import '../providers/inventory_providers.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
@@ -42,23 +44,27 @@ class ProductDetailScreen extends ConsumerWidget {
   }
 }
 
-class _ProductDetailView extends StatelessWidget {
+class _ProductDetailView extends ConsumerWidget {
   final ProductWithStock item;
   const _ProductDetailView({required this.item});
 
   @override
-  Widget build(BuildContext context) {
-    final product = item.product;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final product   = item.product;
+    final role      = ref.watch(currentLabRoleProvider);
+    final canManage = role?.canManage ?? false;
+    final canWrite  = role?.canWrite ?? false;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(product.name, overflow: TextOverflow.ellipsis),
         actions: [
-          IconButton(
-            icon:    const Icon(Icons.edit_outlined),
-            tooltip: 'Edit product',
-            onPressed: () => context.push('/products/edit/${product.id}'),
-          ),
+          if (canManage)
+            IconButton(
+              icon:    const Icon(Icons.edit_outlined),
+              tooltip: 'Edit product',
+              onPressed: () => context.push('/products/edit/${product.id}'),
+            ),
         ],
       ),
       body: ListView(
@@ -98,26 +104,28 @@ class _ProductDetailView extends StatelessWidget {
       ),
 
       // ── FAB actions ───────────────────────────────
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FloatingActionButton.small(
-            heroTag:   'exit',
-            tooltip:   'Register exit',
-            onPressed: () =>
-                context.push('/movements/exit?productId=${product.id}'),
-            child: const Icon(Icons.remove),
-          ),
-          const SizedBox(height: 8),
-          FloatingActionButton.extended(
-            heroTag:   'entry',
-            onPressed: () =>
-                context.push('/movements/entry?productId=${product.id}'),
-            icon:  const Icon(Icons.add),
-            label: const Text('Entry'),
-          ),
-        ],
-      ),
+      floatingActionButton: canWrite
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FloatingActionButton.small(
+                  heroTag:   'exit',
+                  tooltip:   'Register exit',
+                  onPressed: () =>
+                      context.push('/movements/exit?productId=${product.id}'),
+                  child: const Icon(Icons.remove),
+                ),
+                const SizedBox(height: 8),
+                FloatingActionButton.extended(
+                  heroTag:   'entry',
+                  onPressed: () =>
+                      context.push('/movements/entry?productId=${product.id}'),
+                  icon:  const Icon(Icons.add),
+                  label: const Text('Entry'),
+                ),
+              ],
+            )
+          : null,
     );
   }
 }

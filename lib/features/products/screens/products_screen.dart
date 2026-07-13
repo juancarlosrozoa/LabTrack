@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_error_widget.dart';
+import '../../../data/models/lab_membership.dart';
+import '../../auth/providers/lab_provider.dart';
 import '../../inventory/providers/inventory_providers.dart';
 
 class ProductsScreen extends ConsumerWidget {
@@ -12,16 +14,18 @@ class ProductsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final inventoryAsync = ref.watch(inventoryProvider);
+    final canManage       = ref.watch(currentLabRoleProvider)?.canManage ?? false;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Products'),
         actions: [
-          IconButton(
-            icon:    const Icon(Icons.add),
-            tooltip: 'Add product',
-            onPressed: () => context.push('/products/add'),
-          ),
+          if (canManage)
+            IconButton(
+              icon:    const Icon(Icons.add),
+              tooltip: 'Add product',
+              onPressed: () => context.push('/products/add'),
+            ),
         ],
       ),
       body: inventoryAsync.when(
@@ -29,7 +33,7 @@ class ProductsScreen extends ConsumerWidget {
         error:   (e, _) => AppErrorWidget(error: e),
         data:    (items) {
           if (items.isEmpty) return const _EmptyState();
-          return _ProductList(items: items);
+          return _ProductList(items: items, canManage: canManage);
         },
       ),
     );
@@ -40,7 +44,8 @@ class ProductsScreen extends ConsumerWidget {
 
 class _ProductList extends ConsumerStatefulWidget {
   final List items;
-  const _ProductList({required this.items});
+  final bool canManage;
+  const _ProductList({required this.items, required this.canManage});
 
   @override
   ConsumerState<_ProductList> createState() => _ProductListState();
@@ -92,7 +97,10 @@ class _ProductListState extends ConsumerState<_ProductList> {
           child: ListView.builder(
             padding:     const EdgeInsets.only(bottom: 24),
             itemCount:   filtered.length,
-            itemBuilder: (_, i) => _ProductTile(item: filtered[i]),
+            itemBuilder: (_, i) => _ProductTile(
+              item:      filtered[i],
+              canManage: widget.canManage,
+            ),
           ),
         ),
       ],
@@ -102,7 +110,8 @@ class _ProductListState extends ConsumerState<_ProductList> {
 
 class _ProductTile extends ConsumerWidget {
   final dynamic item;
-  const _ProductTile({required this.item});
+  final bool canManage;
+  const _ProductTile({required this.item, required this.canManage});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -139,7 +148,7 @@ class _ProductTile extends ConsumerWidget {
           const Icon(Icons.chevron_right, size: 18),
         ],
       ),
-      onTap: () => context.push('/products/edit/${p.id}'),
+      onTap: canManage ? () => context.push('/products/edit/${p.id}') : null,
     );
   }
 }
