@@ -18,7 +18,6 @@ import '../../features/movements/screens/movements_screen.dart';
 import '../../features/movements/screens/register_movement_screen.dart';
 import '../../features/movements/screens/scan_count_screen.dart';
 import '../../features/weekly_count/screens/weekly_count_screen.dart';
-import '../../features/products/screens/products_screen.dart';
 import '../../features/products/screens/add_edit_product_screen.dart';
 import '../../features/reports/screens/reports_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
@@ -165,20 +164,14 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // ── Outside shell (full-screen flows) ───────
       GoRoute(
-        path: '/products',
-        builder: (_, _) => const ProductsScreen(),
-        routes: [
-          GoRoute(
-            path:    'add',
-            builder: (_, _) => const AddEditProductScreen(),
-          ),
-          GoRoute(
-            path:    'edit/:id',
-            builder: (_, state) => AddEditProductScreen(
-              productId: state.pathParameters['id'],
-            ),
-          ),
-        ],
+        path:    '/products/add',
+        builder: (_, _) => const AddEditProductScreen(),
+      ),
+      GoRoute(
+        path:    '/products/edit/:id',
+        builder: (_, state) => AddEditProductScreen(
+          productId: state.pathParameters['id'],
+        ),
       ),
       GoRoute(
         path:    '/settings',
