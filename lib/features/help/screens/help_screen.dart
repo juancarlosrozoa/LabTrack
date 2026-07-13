@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 class HelpScreen extends StatefulWidget {
   const HelpScreen({super.key});
@@ -13,6 +17,7 @@ class _HelpScreenState extends State<HelpScreen> {
   _Lang _selected = _Lang.es;
   String? _content;
   bool    _loading = true;
+  bool    _downloading = false;
 
   @override
   void initState() {
@@ -32,6 +37,22 @@ class _HelpScreenState extends State<HelpScreen> {
     _load(lang);
   }
 
+  Future<void> _download() async {
+    setState(() => _downloading = true);
+    try {
+      final bytes = await rootBundle.load(_selected.pdfAssetPath);
+      final dir   = await getTemporaryDirectory();
+      final file  = File('${dir.path}/LabTrack_Manual_${_selected.name}.pdf');
+      await file.writeAsBytes(bytes.buffer.asUint8List());
+      await Share.shareXFiles(
+        [XFile(file.path, mimeType: 'application/pdf')],
+        subject: 'LabTrack — User Manual (${_selected.label})',
+      );
+    } finally {
+      if (mounted) setState(() => _downloading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -39,6 +60,19 @@ class _HelpScreenState extends State<HelpScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Help'),
+        actions: [
+          IconButton(
+            icon: _downloading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.download_outlined),
+            tooltip: 'Download PDF',
+            onPressed: _downloading ? null : _download,
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
           child: Padding(
@@ -106,5 +140,11 @@ extension _LangX on _Lang {
         _Lang.es => 'docs/MANUAL_ES.md',
         _Lang.en => 'docs/MANUAL_EN.md',
         _Lang.fr => 'docs/MANUAL_FR.md',
+      };
+
+  String get pdfAssetPath => switch (this) {
+        _Lang.es => 'docs/MANUAL_ES.pdf',
+        _Lang.en => 'docs/MANUAL_EN.pdf',
+        _Lang.fr => 'docs/MANUAL_FR.pdf',
       };
 }

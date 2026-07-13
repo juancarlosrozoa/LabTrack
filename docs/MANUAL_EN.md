@@ -1,6 +1,6 @@
 # LabTrack — User Manual
 
-> Version 1.0 · May 2026
+> Version 1.1 · July 2026
 
 ---
 
@@ -15,9 +15,10 @@
 7. [Inventory Count](#7-inventory-count)
 8. [Reports](#8-reports)
 9. [Settings](#9-settings)
-10. [Barcode Scanning](#10-barcode-scanning)
-11. [Sync and Offline Use](#11-sync-and-offline-use)
-12. [Two Lab Workflows](#12-two-lab-workflows)
+10. [Team and Roles](#10-team-and-roles)
+11. [Barcode Scanning](#11-barcode-scanning)
+12. [Sync and Offline Use](#12-sync-and-offline-use)
+13. [Two Lab Workflows](#13-two-lab-workflows)
 
 ---
 
@@ -118,11 +119,13 @@ Tap the **+ Add product** button (bottom-right corner) to open the product creat
 
 ## 5. Products
 
-The **Products** screen (accessible from Inventory → Add product, or from the general catalog) lists all registered products.
+LabTrack does not have a separate product catalog screen — products are managed directly from **Inventory** and from each product's **detail** page.
+
+> Adding and editing products requires the **Manager** or **Admin** role. If your role is Analyst or Viewer, you won't see these buttons (see [section 10](#10-team-and-roles)).
 
 ### Adding a New Product
 
-Tap the **+** icon in the AppBar. The form asks for:
+Tap the **+ Add product** button on the Inventory screen. The form asks for:
 
 | Field | Required | Description |
 |-------|----------|-------------|
@@ -141,7 +144,7 @@ Tap the **+** icon in the AppBar. The form asks for:
 
 ### Editing a Product
 
-From the product list, tap the product and then the edit icon, or tap the row directly on the Inventory screen.
+From Inventory, tap the product to open its detail page, then the edit icon (pencil) in the top-right corner.
 
 ---
 
@@ -235,7 +238,7 @@ Available actions:
 
 ### Analysis Reports (Quick-Access Cards)
 
-Tap any of the three cards below the header:
+Tap any of the three cards below the header. All three analysis reports (Consumption, Trend, History) have an **Export CSV** icon in the AppBar to download the data and open it in Excel, Sheets, etc.
 
 ---
 
@@ -279,10 +282,15 @@ Lists all saved count sessions, from most recent to oldest.
 
 Access from the gear icon on the Dashboard (top-right corner).
 
+### My Profile
+
+Shows your name and email. Tap the edit icon (pencil) to change your display name.
+
 ### Laboratory
 
-Shows the name of the active laboratory and your role (Admin / Member).
+Shows the name of the active laboratory and your role (Admin, Manager, Analyst, or Viewer — see [section 10](#10-team-and-roles)).
 
+- **Rename laboratory** (edit icon, Admin only) — changes the laboratory's name.
 - **Switch laboratory** — returns to the lab selector to switch to another laboratory in your account.
 
 ### Categories
@@ -328,9 +336,60 @@ Configure when you want to receive notifications:
 
 Tap **Save** to confirm changes.
 
+### Danger Zone
+
+At the bottom of Settings:
+
+- **Delete Account** — permanently deletes your account and removes you from all laboratories. This cannot be undone. If you are the only Admin of a laboratory, you must first transfer the Admin role to another member (see [section 10](#10-team-and-roles)).
+
 ---
 
-## 10. Barcode Scanning
+## 10. Team and Roles
+
+Access from Settings → **Team Members**.
+
+### Available Roles
+
+| Role | Can view | Can register movements / counts | Can manage products, categories, locations, suppliers | Can manage members and the laboratory |
+|------|----------|----------------------------------|-----------------------------------------------------------|--------------------------------------------|
+| **Viewer** | Yes | No | No | No |
+| **Analyst** | Yes | Yes | No | No |
+| **Manager** | Yes | Yes | Yes | No |
+| **Admin** | Yes | Yes | Yes | Yes |
+
+> If your role doesn't have permission for an action, the corresponding button simply won't appear on screen.
+
+### Inviting a Member
+
+1. In Team Members, tap the **+ person** icon (top-right corner) — only visible to Admin/Manager.
+2. Choose the role the new member will have.
+3. Tap **Generate code** — a 6-character code valid for 7 days is generated.
+4. Share the code (**Share** or **Copy** button) through your preferred channel (WhatsApp, email, etc.).
+
+### Joining a Laboratory with a Code
+
+From the laboratory selector (**Lab Picker**), tap **Join with code**, enter the 6-character code, review the laboratory name and the role you'll be assigned, and tap **Join lab**.
+
+### Changing a Member's Role
+
+In Team Members, tap a member (requires Admin/Manager role) and select the new role from the dropdown, then **Save role**.
+
+### Transferring the Admin Role
+
+Only the current Admin can do this:
+
+1. Tap the member who will become the new Admin.
+2. Tap **Transfer admin**.
+3. Choose your new role (Manager, Analyst, or Viewer) — you will stop being Admin.
+4. Confirm with **Transfer**.
+
+### Removing a Member
+
+Tap the member (requires Admin/Manager role) and then **Remove from lab**.
+
+---
+
+## 11. Barcode Scanning
 
 LabTrack can read barcodes and QR codes in several parts of the app:
 
@@ -345,7 +404,7 @@ When tapping the scanner icon, the app will request camera permission on the fir
 
 ---
 
-## 11. Sync and Offline Use
+## 12. Sync and Offline Use
 
 LabTrack works fully offline. All data is stored locally on your device.
 
@@ -361,7 +420,7 @@ Sync is bidirectional: changes made on one device appear on other devices in the
 
 ---
 
-## 12. Two Lab Workflows
+## 13. Two Lab Workflows
 
 LabTrack adapts to two distinct working styles:
 

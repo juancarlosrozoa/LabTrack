@@ -1,6 +1,6 @@
 # LabTrack — Manuel Utilisateur
 
-> Version 1.0 · Mai 2026
+> Version 1.1 · Juillet 2026
 
 ---
 
@@ -15,9 +15,10 @@
 7. [Comptage d'inventaire](#7-comptage-dinventaire)
 8. [Rapports](#8-rapports)
 9. [Paramètres](#9-paramètres)
-10. [Lecture de codes-barres](#10-lecture-de-codes-barres)
-11. [Synchronisation et utilisation hors ligne](#11-synchronisation-et-utilisation-hors-ligne)
-12. [Deux modes de gestion de laboratoire](#12-deux-modes-de-gestion-de-laboratoire)
+10. [Équipe et rôles](#10-équipe-et-rôles)
+11. [Lecture de codes-barres](#11-lecture-de-codes-barres)
+12. [Synchronisation et utilisation hors ligne](#12-synchronisation-et-utilisation-hors-ligne)
+13. [Deux modes de gestion de laboratoire](#13-deux-modes-de-gestion-de-laboratoire)
 
 ---
 
@@ -118,11 +119,13 @@ Appuyez sur le bouton **+ Add product** (coin inférieur droit) pour ouvrir le f
 
 ## 5. Produits
 
-L'écran **Products** (accessible depuis Inventaire → Add product, ou depuis le catalogue général) liste tous les produits enregistrés.
+LabTrack n'a pas d'écran de catalogue de produits séparé — les produits sont gérés directement depuis **Inventaire** et depuis la fiche **détail** de chaque produit.
+
+> Ajouter et modifier des produits requiert le rôle **Manager** ou **Admin**. Si votre rôle est Analyst ou Viewer, ces boutons ne s'afficheront pas (voir [section 10](#10-équipe-et-rôles)).
 
 ### Ajouter un nouveau produit
 
-Appuyez sur l'icône **+** dans la barre d'application. Le formulaire demande :
+Appuyez sur le bouton **+ Add product** sur l'écran Inventaire. Le formulaire demande :
 
 | Champ | Obligatoire | Description |
 |-------|-------------|-------------|
@@ -141,7 +144,7 @@ Appuyez sur l'icône **+** dans la barre d'application. Le formulaire demande :
 
 ### Modifier un produit
 
-Depuis la liste des produits, appuyez sur le produit puis sur l'icône de modification, ou appuyez directement sur la ligne dans l'écran Inventaire.
+Depuis Inventaire, appuyez sur le produit pour ouvrir sa fiche détail, puis sur l'icône de modification (crayon) en haut à droite.
 
 ---
 
@@ -235,7 +238,7 @@ Actions disponibles :
 
 ### Rapports d'analyse (cartes d'accès rapide)
 
-Appuyez sur l'une des trois cartes sous l'en-tête :
+Appuyez sur l'une des trois cartes sous l'en-tête. Les trois rapports d'analyse (Consumption, Trend, History) ont une icône **Export CSV** dans la barre d'application pour télécharger les données et les ouvrir dans Excel, Sheets, etc.
 
 ---
 
@@ -279,10 +282,15 @@ Liste toutes les sessions de comptage enregistrées, de la plus récente à la p
 
 Accessible depuis l'icône engrenage sur le Tableau de bord (coin supérieur droit).
 
+### Mon profil
+
+Affiche votre nom et votre e-mail. Appuyez sur l'icône de modification (crayon) pour changer votre nom affiché.
+
 ### Laboratoire
 
-Affiche le nom du laboratoire actif et votre rôle (Admin / Membre).
+Affiche le nom du laboratoire actif et votre rôle (Admin, Manager, Analyst ou Viewer — voir [section 10](#10-équipe-et-rôles)).
 
+- **Rename laboratory** (icône de modification, Admin uniquement) — change le nom du laboratoire.
 - **Switch laboratory** — retourne au sélecteur de laboratoire pour changer de laboratoire.
 
 ### Catégories
@@ -328,9 +336,60 @@ Configurez quand vous souhaitez recevoir des notifications :
 
 Appuyez sur **Save** pour confirmer les modifications.
 
+### Zone de danger
+
+En bas des Paramètres :
+
+- **Delete Account** — supprime définitivement votre compte et vous retire de tous les laboratoires. Cette action est irréversible. Si vous êtes le seul Admin d'un laboratoire, vous devez d'abord transférer le rôle d'Admin à un autre membre (voir [section 10](#10-équipe-et-rôles)).
+
 ---
 
-## 10. Lecture de codes-barres
+## 10. Équipe et rôles
+
+Accessible depuis Paramètres → **Team Members**.
+
+### Rôles disponibles
+
+| Rôle | Peut consulter | Peut enregistrer mouvements / comptages | Peut gérer produits, catégories, emplacements, fournisseurs | Peut gérer les membres et le laboratoire |
+|------|-----------------|-------------------------------------------|-------------------------------------------------------------------|------------------------------------------------|
+| **Viewer** | Oui | Non | Non | Non |
+| **Analyst** | Oui | Oui | Non | Non |
+| **Manager** | Oui | Oui | Oui | Non |
+| **Admin** | Oui | Oui | Oui | Oui |
+
+> Si votre rôle n'a pas la permission pour une action, le bouton correspondant n'apparaît tout simplement pas à l'écran.
+
+### Inviter un membre
+
+1. Dans Team Members, appuyez sur l'icône **+ personne** (coin supérieur droit) — visible uniquement pour Admin/Manager.
+2. Choisissez le rôle du nouveau membre.
+3. Appuyez sur **Generate code** — un code à 6 caractères valable 7 jours est généré.
+4. Partagez le code (bouton **Share** ou **Copy**) par le moyen de votre choix (WhatsApp, e-mail, etc.).
+
+### Rejoindre un laboratoire avec un code
+
+Depuis le sélecteur de laboratoire (**Lab Picker**), appuyez sur **Join with code**, saisissez le code à 6 caractères, vérifiez le nom du laboratoire et le rôle qui vous sera attribué, puis appuyez sur **Join lab**.
+
+### Changer le rôle d'un membre
+
+Dans Team Members, appuyez sur un membre (requiert le rôle Admin/Manager) et sélectionnez le nouveau rôle dans le menu déroulant, puis **Save role**.
+
+### Transférer le rôle d'Admin
+
+Seul l'Admin actuel peut le faire :
+
+1. Appuyez sur le membre qui deviendra le nouvel Admin.
+2. Appuyez sur **Transfer admin**.
+3. Choisissez votre nouveau rôle (Manager, Analyst ou Viewer) — vous ne serez plus Admin.
+4. Confirmez avec **Transfer**.
+
+### Retirer un membre
+
+Appuyez sur le membre (requiert le rôle Admin/Manager) puis sur **Remove from lab**.
+
+---
+
+## 11. Lecture de codes-barres
 
 LabTrack peut lire les codes-barres et les codes QR dans plusieurs parties de l'application :
 
@@ -345,7 +404,7 @@ Lors du premier appui sur l'icône scanner, l'application demande l'autorisation
 
 ---
 
-## 11. Synchronisation et utilisation hors ligne
+## 12. Synchronisation et utilisation hors ligne
 
 LabTrack fonctionne entièrement hors ligne. Toutes les données sont stockées localement sur votre appareil.
 
@@ -361,7 +420,7 @@ La synchronisation est bidirectionnelle : les modifications effectuées sur un a
 
 ---
 
-## 12. Deux modes de gestion de laboratoire
+## 13. Deux modes de gestion de laboratoire
 
 LabTrack s'adapte à deux styles de travail distincts :
 

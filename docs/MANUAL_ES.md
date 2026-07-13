@@ -1,6 +1,6 @@
 # LabTrack — Manual de Usuario
 
-> Versión 1.0 · Mayo 2026
+> Versión 1.1 · Julio 2026
 
 ---
 
@@ -15,9 +15,10 @@
 7. [Conteo de inventario](#7-conteo-de-inventario)
 8. [Reportes](#8-reportes)
 9. [Configuración](#9-configuración)
-10. [Escaneo de código de barras](#10-escaneo-de-código-de-barras)
-11. [Sincronización y uso sin conexión](#11-sincronización-y-uso-sin-conexión)
-12. [Dos tipos de laboratorio](#12-dos-tipos-de-laboratorio)
+10. [Equipo y roles](#10-equipo-y-roles)
+11. [Escaneo de código de barras](#11-escaneo-de-código-de-barras)
+12. [Sincronización y uso sin conexión](#12-sincronización-y-uso-sin-conexión)
+13. [Dos tipos de laboratorio](#13-dos-tipos-de-laboratorio)
 
 ---
 
@@ -118,11 +119,13 @@ Toca el botón **+ Add product** (esquina inferior derecha) para ir al formulari
 
 ## 5. Productos
 
-La pantalla **Products** (accesible desde Inventario → Add product, o desde el catálogo general) muestra todos los productos registrados.
+LabTrack no tiene un catálogo de productos separado — se gestionan directamente desde **Inventario** y desde el **detalle de cada producto**.
+
+> Agregar y editar productos requiere rol **Manager** o **Admin**. Si tu rol es Analyst o Viewer, no verás estos botones (ver [sección 10](#10-equipo-y-roles)).
 
 ### Agregar un producto nuevo
 
-Toca el ícono **+** en el AppBar. El formulario solicita:
+Toca el botón **+ Add product** en la pantalla de Inventario. El formulario solicita:
 
 | Campo | Obligatorio | Descripción |
 |-------|-------------|-------------|
@@ -141,7 +144,7 @@ Toca el ícono **+** en el AppBar. El formulario solicita:
 
 ### Editar un producto
 
-Desde la lista de productos, toca el producto y luego el ícono de editar, o toca directamente la fila en la pantalla de Inventario.
+Desde Inventario, toca el producto para abrir su detalle y luego el ícono de editar (lápiz) en la esquina superior derecha.
 
 ---
 
@@ -235,7 +238,7 @@ Acciones disponibles:
 
 ### Reportes de análisis (cards de acceso rápido)
 
-Toca cualquiera de las tres cards debajo del encabezado:
+Toca cualquiera de las tres cards debajo del encabezado. Los tres reportes de análisis (Consumption, Trend, History) tienen un ícono **Export CSV** en el AppBar para descargar los datos y abrirlos en Excel, Sheets, etc.
 
 ---
 
@@ -279,10 +282,15 @@ Lista todas las sesiones de conteo guardadas, del más reciente al más antiguo.
 
 Accede desde el ícono de engranaje en el Dashboard (esquina superior derecha).
 
+### Mi perfil
+
+Muestra tu nombre y correo. Toca el ícono de editar (lápiz) para cambiar tu nombre para mostrar.
+
 ### Laboratorio
 
-Muestra el nombre del laboratorio activo y tu rol (Admin / Member).
+Muestra el nombre del laboratorio activo y tu rol (Admin, Manager, Analyst o Viewer — ver [sección 10](#10-equipo-y-roles)).
 
+- **Rename laboratory** (ícono de editar, solo Admin) — cambia el nombre del laboratorio.
 - **Switch laboratory** — regresa al selector de laboratorio para cambiar a otro laboratorio de tu cuenta.
 
 ### Categorías
@@ -328,9 +336,60 @@ Configura cuándo deseas recibir notificaciones:
 
 Toca **Save** para confirmar los cambios.
 
+### Zona de peligro
+
+Al final de Configuración:
+
+- **Delete Account** — elimina tu cuenta permanentemente y te remueve de todos los laboratorios. Esta acción no se puede deshacer. Si eres el único Admin de un laboratorio, primero debes transferir el rol de Admin a otro miembro (ver [sección 10](#10-equipo-y-roles)).
+
 ---
 
-## 10. Escaneo de código de barras
+## 10. Equipo y roles
+
+Accede desde Configuración → **Team Members**.
+
+### Roles disponibles
+
+| Rol | Puede ver | Puede registrar movimientos / conteos | Puede gestionar productos, categorías, ubicaciones, proveedores | Puede gestionar miembros y el laboratorio |
+|-----|-----------|----------------------------------------|-------------------------------------------------------------------|----------------------------------------------|
+| **Viewer** | Sí | No | No | No |
+| **Analyst** | Sí | Sí | No | No |
+| **Manager** | Sí | Sí | Sí | No |
+| **Admin** | Sí | Sí | Sí | Sí |
+
+> Si tu rol no tiene permiso para una acción, el botón correspondiente simplemente no aparece en la pantalla.
+
+### Invitar a un miembro
+
+1. En Team Members, toca el ícono **+ persona** (esquina superior derecha) — solo visible para Admin/Manager.
+2. Elige el rol que tendrá el nuevo miembro.
+3. Toca **Generate code** — se genera un código de 6 caracteres válido por 7 días.
+4. Comparte el código (botón **Share** o **Copy**) por el medio que prefieras (WhatsApp, correo, etc.).
+
+### Unirse a un laboratorio con un código
+
+Desde el selector de laboratorio (**Lab Picker**), toca **Join with code**, ingresa el código de 6 caracteres, revisa el nombre del laboratorio y el rol que se te asignará, y toca **Join lab**.
+
+### Cambiar el rol de un miembro
+
+En Team Members, toca a un integrante (requiere rol Admin/Manager) y selecciona el nuevo rol en el menú desplegable, luego **Save role**.
+
+### Transferir el rol de Admin
+
+Solo el Admin actual puede hacerlo:
+
+1. Toca al miembro que será el nuevo Admin.
+2. Toca **Transfer admin**.
+3. Elige tu nuevo rol (Manager, Analyst o Viewer) — dejarás de ser Admin.
+4. Confirma con **Transfer**.
+
+### Remover a un miembro
+
+Toca al miembro (requiere rol Admin/Manager) y luego **Remove from lab**.
+
+---
+
+## 11. Escaneo de código de barras
 
 LabTrack puede leer códigos de barras y QR en varias partes de la app:
 
@@ -345,7 +404,7 @@ Al tocar el ícono de escáner, la app solicita permiso de cámara la primera ve
 
 ---
 
-## 11. Sincronización y uso sin conexión
+## 12. Sincronización y uso sin conexión
 
 LabTrack funciona completamente sin conexión a internet. Todos los datos se guardan localmente en tu dispositivo.
 
@@ -361,7 +420,7 @@ La sincronización es bidireccional: los cambios que hagas en un dispositivo apa
 
 ---
 
-## 12. Dos tipos de laboratorio
+## 13. Dos tipos de laboratorio
 
 LabTrack se adapta a dos flujos de trabajo distintos:
 
